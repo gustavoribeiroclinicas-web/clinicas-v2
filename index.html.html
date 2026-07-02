@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gestão Clínicas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F0EEE9;--surface:#fff;--surface2:#F7F6F3;--border:#E4E1DA;
+  --text:#1C1B18;--muted:#6B6860;--hint:#A8A59E;
+  --purple:#534AB7;--purple-bg:#EEEDFE;--purple-dark:#3C3489;
+  --green:#3B6D11;--green-bg:#EAF3DE;--green-bd:#C0DD97;
+  --red:#A32D2D;--red-bg:#FCEBEB;--red-bd:#F7C1C1;
+  --amber:#854F0B;--amber-bg:#FAEEDA;--amber-bd:#FAC775;
+  --blue:#185FA5;--blue-bg:#E6F1FB;
+  --r:8px;--r-lg:12px;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Inter',sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* ── LOGIN ── */
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;background:var(--bg)}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:2rem;width:100%;max-width:360px;box-shadow:0 2px 20px rgba(0,0,0,.06)}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem}
+.login-logo-icon{width:36px;height:36px;border-radius:var(--r);background:var(--purple);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px}
+.login-logo-txt{font-size:15px;font-weight:600;color:var(--text)}
+.login-tabs{display:flex;background:var(--surface2);border-radius:var(--r);padding:3px;gap:3px;margin-bottom:1.25rem}
+.login-tab{flex:1;padding:7px;font-size:12px;font-weight:500;border:none;border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);transition:all .15s}
+.login-tab.active{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.inp{width:100%;padding:10px 12px;font-size:13px;font-family:var(--sans);border:1px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--text);margin-bottom:10px;transition:border-color .15s}
+.inp:focus{outline:none;border-color:var(--purple)}
+.btn{font-family:var(--sans);font-size:13px;font-weight:500;padding:9px 16px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .12s;white-space:nowrap}
+.btn:hover{background:var(--surface2)}
+.btn-primary{background:var(--purple);border-color:var(--purple);color:#fff}
+.btn-primary:hover{background:var(--purple-dark)}
+.btn-full{width:100%;justify-content:center}
+.btn-sm{padding:5px 10px;font-size:12px}
+.login-err{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd);border-radius:var(--r);padding:10px 12px;font-size:12px;margin-top:8px;display:none}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;padding:0 1.5rem;position:sticky;top:0;z-index:100;gap:0}
+.topbar-brand{font-size:14px;font-weight:600;color:var(--text);padding-right:1.25rem;border-right:1px solid var(--border);margin-right:1.25rem;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.topbar-brand-icon{width:24px;height:24px;border-radius:6px;background:var(--purple);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px}
+.nav-tab{padding:6px 12px;font-size:13px;color:var(--muted);cursor:pointer;border-radius:var(--r);transition:all .12s;white-space:nowrap;font-weight:400;border:none;background:transparent;font-family:var(--sans)}
+.nav-tab:hover{color:var(--text);background:var(--surface2)}
+.nav-tab.active{color:var(--purple);background:var(--purple-bg);font-weight:500}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.user-chip{font-size:12px;color:var(--muted);background:var(--surface2);padding:4px 10px;border-radius:99px;border:1px solid var(--border)}
+
+/* ── PAGES ── */
+.page{display:none;padding:1.5rem;max-width:1200px;margin:0 auto}
+.page.active{display:block}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:10px}
+.page-header h2{font-size:18px;font-weight:600}
+.page-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:1rem}
+.card-header{padding:.875rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.card-title{font-size:14px;font-weight:500}
+.card-body{padding:1.25rem}
+
+/* ── SELECTS ── */
+.sel{font-size:13px;padding:7px 10px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-family:var(--sans)}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{padding:8px 12px;text-align:left;font-size:11px;font-weight:500;color:var(--muted);background:var(--surface2);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--surface2);vertical-align:middle}
+.tbl tbody tr:last-child td{border-bottom:none}
+.tbl tbody tr:hover td{background:var(--surface2)}
+
+/* ── BADGES ── */
+.badge{font-size:10px;font-weight:500;padding:2px 7px;border-radius:99px;white-space:nowrap}
+.badge-purple{background:var(--purple-bg);color:var(--purple)}
+.badge-green{background:var(--green-bg);color:var(--green)}
+.badge-red{background:var(--red-bg);color:var(--red)}
+.badge-amber{background:var(--amber-bg);color:var(--amber)}
+.badge-gray{background:var(--surface2);color:var(--muted)}
+
+/* ── FOLHA ── */
+.clinica-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:1.25rem}
+.cl-btn{padding:10px 12px;border-radius:var(--r-lg);border:1px solid var(--border);background:var(--surface);color:var(--text);text-align:left;cursor:pointer;font-family:var(--sans);transition:all .15s}
+.cl-btn:hover{border-color:var(--purple);background:var(--purple-bg)}
+.cl-btn.active{border-color:var(--purple);background:var(--purple);color:#fff}
+.cl-btn-name{font-size:12px;font-weight:500;margin-bottom:2px}
+.cl-btn-val{font-size:11px;opacity:.75;font-family:var(--mono)}
+.cargo-row{display:grid;grid-template-columns:28px 140px 1fr 100px 100px 100px 100px 110px 40px;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--surface2);font-size:13px}
+.cargo-row:last-child{border-bottom:none}
+.cargo-row-hdr{background:var(--surface2);border-radius:var(--r) var(--r) 0 0;font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.cargo-inp{width:100%;padding:5px 8px;font-size:12px;border:1px solid var(--border);border-radius:6px;font-family:var(--sans);background:var(--surface);color:var(--text)}
+.cargo-inp:focus{outline:none;border-color:var(--purple)}
+.cargo-inp.mono{font-family:var(--mono)}
+.cargo-lbl{font-size:11px;color:var(--muted);font-weight:500}
+.total-bar{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface2);border-top:1px solid var(--border);font-size:13px}
+.total-val{font-size:16px;font-weight:600;font-family:var(--mono)}
+
+/* ── PONTO ── */
+.ponto-day-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.ponto-reg-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.5rem;max-width:440px;margin:0 auto;text-align:center}
+.ponto-time-big{font-size:48px;font-weight:600;font-family:var(--mono);color:var(--text);line-height:1;margin:1rem 0 .5rem}
+.janela-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:99px;font-size:12px;font-weight:500}
+.ponto-inp-time{width:100%;padding:12px;font-size:20px;font-family:var(--mono);border:1.5px solid var(--border);border-radius:var(--r);text-align:center;background:var(--surface);color:var(--text);margin:1rem 0}
+.ponto-inp-time:focus{outline:none;border-color:var(--purple)}
+
+/* ── EXTRATOR ── */
+.dropzone{border:2px dashed var(--border);border-radius:var(--r-lg);background:var(--surface);padding:2.5rem 1.5rem;text-align:center;cursor:pointer;transition:all .15s;position:relative}
+.dropzone:hover,.dropzone.drag{border-color:var(--purple);background:var(--purple-bg)}
+.dropzone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dropzone-icon{font-size:28px;margin-bottom:.75rem;display:block}
+.dropzone-title{font-size:14px;font-weight:500;margin-bottom:4px}
+.dropzone-sub{font-size:12px;color:var(--muted)}
+.pdf-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:12px}
+.pdf-card-head{display:flex;align-items:center;gap:12px;padding:14px 16px}
+.pdf-card-dot{width:8px;height:8px;border-radius:50%;background:var(--hint);flex-shrink:0}
+.pdf-card-dot.ok{background:var(--green)}
+.pdf-card-dot.err{background:var(--red)}
+.pdf-card-dot.busy{background:var(--purple);animation:pulse 1s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.pdf-card-meta{flex:1;min-width:0}
+.pdf-clinic-inp{font-size:14px;font-weight:500;border:none;background:transparent;color:var(--text);width:100%;border-bottom:1px solid transparent;padding:1px 0;font-family:var(--sans)}
+.pdf-clinic-inp:hover,.pdf-clinic-inp:focus{border-bottom-color:var(--border);outline:none}
+.pdf-fname{font-size:11px;color:var(--muted);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pdf-stat{text-align:right;white-space:nowrap;font-size:12px;color:var(--muted)}
+.pdf-stat b{font-size:18px;font-weight:700;color:var(--text);display:block;line-height:1.1}
+.pdf-body{border-top:1px solid var(--border);padding:4px 16px 14px}
+.pdf-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.pdf-tbl th{text-align:left;font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:6px 8px;border-bottom:1px solid var(--border)}
+.pdf-tbl td{padding:7px 8px;border-bottom:1px solid var(--surface2)}
+.pdf-tbl td.proc{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.pdf-tbl tr:last-child td{border-bottom:none}
+.pdf-tbl tr.excl td{opacity:.35;text-decoration:line-through}
+
+/* ── CONFIG ── */
+.cfg-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.25rem;margin-bottom:1rem;max-width:580px}
+.cfg-title{font-size:14px;font-weight:500;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;font-weight:500}
+.fg input,.fg select{width:100%;padding:8px 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--r);font-family:var(--sans);background:var(--surface);color:var(--text)}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--purple)}
+.clinica-senha-row{display:grid;grid-template-columns:140px 1fr;gap:8px;align-items:center;margin-bottom:6px}
+.clinica-senha-row label{font-size:12px;font-weight:500;color:var(--text)}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--r-lg);max-width:480px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.15)}
+.modal-hdr{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface)}
+.modal-title{font-size:15px;font-weight:500}
+.modal-close{width:28px;height:28px;border-radius:50%;border:none;background:var(--surface2);cursor:pointer;font-size:16px;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.modal-body{padding:1.25rem}
+
+/* ── MISC ── */
+.loading{text-align:center;padding:3rem;color:var(--muted);font-size:14px}
+.empty{text-align:center;padding:2rem;color:var(--muted);font-size:13px;font-style:italic}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.25rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1rem}
+.stat-label{font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+.stat-val{font-size:22px;font-weight:600;color:var(--text);font-family:var(--mono)}
+.hint{font-size:11px;color:var(--muted);line-height:1.5;margin-top:4px}
+@media(max-width:640px){
+.topbar{padding:0 .75rem;overflow-x:auto}
+.page{padding:1rem .75rem}
+.cargo-row{grid-template-columns:28px 1fr 80px 80px 80px 80px 90px 36px;font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="tela-login" class="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">🏥</div>
+      <span class="login-logo-txt">Gestão Clínicas</span>
+    </div>
+    <div class="login-tabs">
+      <button class="login-tab active" onclick="setLoginTipo('gestor',this)">Gestor</button>
+      <button class="login-tab" onclick="setLoginTipo('recepcao',this)">Recepção</button>
+      <button class="login-tab" onclick="setLoginTipo('diretor',this)">Diretor</button>
+    </div>
+    <div id="login-gestor">
+      <input class="inp" type="password" id="inp-gestor" placeholder="Senha do gestor" onkeydown="if(event.key==='Enter')entrar('gestor')">
+      <button class="btn btn-primary btn-full" onclick="entrar('gestor')">Entrar</button>
+    </div>
+    <div id="login-recepcao" style="display:none">
+      <select class="sel" id="sel-clinica-login" style="width:100%;margin-bottom:10px">
+        <option value="">Selecione a clínica...</option>
+        <option>Boa Vista</option><option>Bacacheri</option><option>ColomboMed</option>
+        <option>Etika SJP</option><option>FRG</option><option>GPTRAN</option>
+        <option>Galeb</option><option>Hauer</option><option>Lifetran</option>
+        <option>MM</option><option>PrimeMed</option><option>PPTRAN</option>
+        <option>Rio Sul</option><option>São José</option><option>Tolmac</option>
+      </select>
+      <input class="inp" type="password" id="inp-recepcao" placeholder="Senha da clínica" onkeydown="if(event.key==='Enter')entrar('recepcao')">
+      <button class="btn btn-primary btn-full" onclick="entrar('recepcao')">Entrar</button>
+    </div>
+    <div id="login-diretor" style="display:none">
+      <input class="inp" type="password" id="inp-diretor" placeholder="Senha do diretor" onkeydown="if(event.key==='Enter')entrar('diretor')">
+      <button class="btn btn-primary btn-full" onclick="entrar('diretor')">Entrar</button>
+    </div>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <div class="topbar">
+    <div class="topbar-brand"><div class="topbar-brand-icon">🏥</div>Clínicas</div>
+    <button class="nav-tab active" id="tab-folha" onclick="showPage('folha',this)">Folha</button>
+    <button class="nav-tab" id="tab-ponto" onclick="showPage('ponto',this)">Ponto</button>
+    <button class="nav-tab" id="tab-contas" onclick="showPage('contas',this)">Contas</button>
+    <button class="nav-tab" id="tab-extrator" onclick="showPage('extrator',this)">Extrator DETRAN</button>
+    <button class="nav-tab" id="tab-cfg" onclick="showPage('config',this)">Configurações</button>
+    <div class="topbar-right">
+      <span class="user-chip" id="user-chip"></span>
+      <button class="btn btn-sm" onclick="sair()">Sair</button>
+    </div>
+  </div>
+
+  <!-- FOLHA -->
+  <div id="page-folha" class="page active">
+    <div class="page-header">
+      <h2>Folha de pagamento</h2>
+      <div class="page-controls">
+        <select class="sel" id="mes-folha" onchange="renderFolha()">
+          <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+          <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+          <option value="7" selected>Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+          <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+        </select>
+        <select class="sel" id="ano-folha" onchange="renderFolha()">
+          <option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option>
+        </select>
+      </div>
+    </div>
+    <div class="clinica-grid" id="folha-clinicas"></div>
+    <div id="folha-tabela"></div>
+  </div>
+
+  <!-- PONTO -->
+  <div id="page-ponto" class="page">
+    <div id="ponto-gestor" style="display:none">
+      <div class="page-header">
+        <h2>Controle de ponto</h2>
+        <div class="page-controls">
+          <select class="sel" id="ponto-cl-sel" onchange="renderPontoGestor()">
+            <option value="">Selecione a clínica...</option>
+            <option>Boa Vista</option><option>Bacacheri</option><option>ColomboMed</option>
+            <option>Etika SJP</option><option>FRG</option><option>GPTRAN</option>
+            <option>Galeb</option><option>Hauer</option><option>Lifetran</option>
+            <option>MM</option><option>PrimeMed</option><option>PPTRAN</option>
+            <option>Rio Sul</option><option>São José</option><option>Tolmac</option>
+          </select>
+          <select class="sel" id="ponto-mes-sel" onchange="renderPontoGestor()">
+            <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+            <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+            <option value="7" selected>Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+            <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+          </select>
+          <select class="sel" id="ponto-ano-sel" onchange="renderPontoGestor()">
+            <option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option>
+          </select>
+          <button class="btn" onclick="exportarPontoPDF()" style="color:var(--red);border-color:var(--red-bd)">📄 PDF</button>
+        </div>
+      </div>
+      <div class="stat-grid" id="ponto-stats"></div>
+      <div id="ponto-tabela"></div>
+    </div>
+    <div id="ponto-recepcao" style="display:none">
+      <div class="ponto-reg-card">
+        <div id="ponto-rec-data" style="font-size:13px;color:var(--muted);margin-bottom:.25rem"></div>
+        <div id="ponto-rec-clinica" style="font-size:16px;font-weight:600;margin-bottom:1rem"></div>
+        <div id="ponto-rec-area"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTAS A PAGAR -->
+  <div id="page-contas" class="page">
+    <div class="page-header">
+      <h2>Contas a pagar</h2>
+      <div class="page-controls">
+        <select class="sel" id="mes-contas" onchange="trocarMesContas()">
+          <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+          <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+          <option value="7" selected>Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+          <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+        </select>
+        <select class="sel" id="ano-contas" onchange="trocarMesContas()">
+          <option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option>
+        </select>
+        <span id="contas-perfil-badge"></span>
+      </div>
+    </div>
+    <div class="stat-grid" id="contas-stats"></div>
+    <div class="clinica-grid" id="contas-clinica-tabs"></div>
+    <div id="contas-tabela"></div>
+  </div>
+
+  <!-- MODAL CONTA -->
+  <div id="modal-conta" class="modal-overlay" onclick="if(event.target===this)fecharModalConta()">
+    <div class="modal">
+      <div class="modal-hdr">
+        <span class="modal-title" id="modal-conta-titulo">Nova conta</span>
+        <button class="modal-close" onclick="fecharModalConta()">×</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="conta-id">
+        <div class="fg"><label>Descrição</label><input type="text" id="conta-desc" placeholder="Ex: Copel, Aluguel..."></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="fg"><label>Vencimento</label><input type="date" id="conta-venc"></div>
+          <div class="fg"><label>Valor (R$)</label><input type="number" id="conta-valor" placeholder="0,00" min="0" step="0.01"></div>
+        </div>
+        <div class="fg">
+          <label>Link do PDF (Google Drive)</label>
+          <input type="url" id="conta-pdf" placeholder="https://drive.google.com/file/d/...">
+          <div class="hint">Suba o PDF no Google Drive → Compartilhar → "Qualquer pessoa com o link" → cole aqui</div>
+        </div>
+        <div class="fg"><label>Observação</label><input type="text" id="conta-obs" placeholder="Informações adicionais..."></div>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="btn btn-primary" style="flex:1" onclick="salvarConta()">✓ Salvar</button>
+          <button class="btn" id="btn-excluir-conta" style="color:var(--red);border-color:var(--red-bd);display:none" onclick="excluirConta()">Excluir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXTRATOR -->
+  <div id="page-extrator" class="page">
+    <div class="page-header"><h2>Extrator DETRAN</h2></div>
+    <div class="card">
+      <div class="card-body">
+        <div class="dropzone" id="dropzone">
+          <input type="file" id="fileInput" accept="application/pdf" multiple>
+          <span class="dropzone-icon">📂</span>
+          <div class="dropzone-title">Solte PDFs aqui ou clique para selecionar</div>
+          <div class="dropzone-sub">Relatório "Processos Vinculados" exportado do SCH · uma ou mais clínicas</div>
+        </div>
+      </div>
+    </div>
+    <div id="pdf-queue"></div>
+    <div id="pdf-toolbar" style="display:none;margin-top:1rem;display:none;justify-content:space-between;align-items:center">
+      <span style="font-size:13px;color:var(--muted)" id="pdf-toolbar-count"></span>
+      <button class="btn" id="btn-zip">⬇ Baixar todos (.zip)</button>
+    </div>
+  </div>
+
+  <!-- CONFIG -->
+  <div id="page-config" class="page">
+    <div class="cfg-card">
+      <div class="cfg-title">🔑 Acesso</div>
+      <div class="fg"><label>Senha do gestor</label><input type="password" id="cfg-senha-gestor" placeholder="Nova senha..."></div>
+      <div class="fg"><label>Senha do diretor</label><input type="password" id="cfg-senha-diretor" placeholder="Nova senha..."></div>
+      <button class="btn btn-primary btn-sm" onclick="salvarSenhaGestor()">Salvar senhas de acesso</button>
+      <div style="margin-top:1.25rem;margin-bottom:.75rem;font-size:13px;font-weight:500">Senhas por clínica</div>
+      <div id="cfg-senhas-clinicas"></div>
+      <button class="btn btn-primary btn-sm" onclick="salvarSenhasClinicas()" style="margin-top:8px">Salvar senhas</button>
+    </div>
+    <div class="cfg-card">
+      <div class="cfg-title">💾 Backup</div>
+      <p class="hint" style="margin-bottom:.75rem">Exporte todos os dados (folha e ponto) em JSON para guardar em local seguro.</p>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="exportarBackup()">⬇ Exportar backup</button>
+        <button class="btn" onclick="document.getElementById('inp-importar').click()">⬆ Importar</button>
+        <input type="file" id="inp-importar" accept=".json" style="display:none" onchange="importarBackup(this)">
+      </div>
+      <div class="hint" style="margin-top:8px">Último backup: <span id="ultimo-backup">nunca</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL JUSTIFICATIVA PONTO -->
+<div id="modal-justif" class="modal-overlay" onclick="if(event.target===this)fecharModalJustif()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <span class="modal-title" id="modal-justif-titulo">Registrar / justificar</span>
+      <button class="modal-close" onclick="fecharModalJustif()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="jf-clinica">
+      <input type="hidden" id="jf-dia">
+      <div class="fg"><label>Horário registrado pelo gestor</label><input type="time" id="jf-entrada" placeholder="Entrada"></div>
+      <div class="fg"><label>Saída registrada pelo gestor</label><input type="time" id="jf-saida" placeholder="Saída"></div>
+      <div class="fg">
+        <label>Justificativa</label>
+        <select id="jf-motivo" class="inp">
+          <option value="">Selecione...</option>
+          <optgroup label="Atraso"><option>Atestado médico</option><option>Declaração médica</option><option>Atraso sem justificativa</option><option>Problema pessoal</option><option>Transporte público</option></optgroup>
+          <optgroup label="Saída antecipada"><option>Estágio obrigatório faculdade</option><option>Horário de aula</option><option>Liberado pelo gestor</option><option>Consulta médica</option><option>Emergência familiar</option></optgroup>
+          <optgroup label="Outros"><option>Falta justificada</option><option>Falta injustificada</option><option>Outro</option></optgroup>
+        </select>
+      </div>
+      <div class="fg"><label>Observação (opcional)</label><input type="text" id="jf-obs" placeholder="Detalhes adicionais..."></div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-primary" style="flex:1" onclick="salvarJustif()">✓ Salvar</button>
+        <button class="btn" id="btn-remover-justif" style="color:var(--red);border-color:var(--red-bd)" onclick="removerPontoDia()">Remover</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal cargo folha -->
+<div id="modal-cargo" class="modal-overlay" onclick="if(event.target===this)fecharModalCargo()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <span class="modal-title" id="modal-cargo-titulo">Novo cargo</span>
+      <button class="modal-close" onclick="fecharModalCargo()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="cargo-id">
+      <div class="fg"><label>Tipo de cargo</label>
+        <select id="cargo-tipo" class="inp">
+          <option value="Médico">Médico</option>
+          <option value="Psicólogo">Psicólogo</option>
+          <option value="Recepção">Recepção</option>
+          <option value="Limpeza">Limpeza</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+      <div class="fg"><label>Nome</label><input type="text" id="cargo-nome" placeholder="Nome do colaborador..."></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="fg"><label>Valor base (R$)</label><input type="number" id="cargo-valor" placeholder="0,00" min="0" step="0.01"></div>
+        <div class="fg"><label>VT (R$)</label><input type="number" id="cargo-vt" placeholder="0,00" min="0" step="0.01"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="fg"><label style="color:var(--red)">Desconto (R$)</label><input type="number" id="cargo-desc" placeholder="0,00" min="0" step="0.01"></div>
+        <div class="fg"><label style="color:var(--green)">Extra (R$)</label><input type="number" id="cargo-extra" placeholder="0,00" min="0" step="0.01"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-primary" style="flex:1" onclick="salvarCargo()">✓ Salvar</button>
+        <button class="btn" id="btn-excluir-cargo" style="color:var(--red);border-color:var(--red-bd);display:none" onclick="excluirCargo()">Excluir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import{getDatabase,ref,set,get}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+// ── CONFIG FIREBASE ──────────────────────────────────
+const FB={
+  apiKey:"AIzaSyAZXDaDQeITajdHkTrn38W2CoVce1Zhs7Y",
+  authDomain:"dashboard-clinicas-b471f.firebaseapp.com",
+  databaseURL:"https://dashboard-clinicas-b471f-default-rtdb.firebaseio.com",
+  projectId:"dashboard-clinicas-b471f",
+  storageBucket:"dashboard-clinicas-b471f.firebasestorage.app",
+  messagingSenderId:"802245105282",
+  appId:"1:802245105282:web:5241e3a59c963cec38c69b"
+};
+const app=initializeApp(FB,'v2');
+const db=getDatabase(app);
+
+async function dbGet(p){const s=await get(ref(db,'v2/'+p));return s.exists()?s.val():null;}
+async function dbSet(p,v){await set(ref(db,'v2/'+p),v);}
+
+// ── CONSTANTES ────────────────────────────────────────
+const CLINICAS=['Boa Vista','Bacacheri','ColomboMed','Etika SJP','FRG','GPTRAN','Galeb','Hauer','Lifetran','MM','PrimeMed','PPTRAN','Rio Sul','São José','Tolmac'];
+const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const ENTRADA_ESP='08:00';
+const SAIDA_ESP='17:00';
+const JAN_E_INI='07:00',JAN_E_FIM='09:00';
+const JAN_S_INI='15:00',JAN_S_FIM='18:00';
+
+// ── ESTADO ────────────────────────────────────────────
+let perfilAtual='';
+let clinicaAtual='';
+let cfg={senhaGestor:'gestor123',senhasClinicas:{}};
+let folhaData={};
+let pontoData={};
+
+// ── UTILS ─────────────────────────────────────────────
+const chave=(m,a)=>`${m}_${a}`;
+const fmt=v=>'R$ '+(v||0).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+const h2m=h=>{if(!h)return 0;const[hh,mm]=h.split(':').map(Number);return hh*60+mm;};
+const agora=()=>{const n=new Date();return String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');};
+const hoje=()=>new Date();
+const isDiaUtil=d=>d.getDay()>0&&d.getDay()<6;
+const dentroJanela=(ini,fim)=>{const a=h2m(agora());return a>=h2m(ini)&&a<=h2m(fim);};
+
+// ── CARREGAR CONFIG ────────────────────────────────────
+async function carregarCfg(){
+const c=await dbGet('cfg');
+if(c)cfg=Object.assign(cfg,c);
+}
+
+// ── LOGIN ─────────────────────────────────────────────
+let loginTipo='gestor';
+
+function setLoginTipo(tipo,el){
+  loginTipo=tipo;
+  document.querySelectorAll('.login-tab').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('login-gestor').style.display=tipo==='gestor'?'block':'none';
+  document.getElementById('login-recepcao').style.display=tipo==='recepcao'?'block':'none';
+const ld=document.getElementById('login-diretor');if(ld)ld.style.display=tipo==='diretor'?'block':'none';
+  document.getElementById('login-err').style.display='none';
+}
+
+async function entrar(tipo){
+const errEl=document.getElementById('login-err');
+  errEl.style.display='none';
+await carregarCfg();
+if(tipo==='gestor'){
+const pw=document.getElementById('inp-gestor').value.trim();
+if(!pw){errEl.textContent='Digite a senha.';errEl.style.display='block';return;}
+if(pw!==cfg.senhaGestor){errEl.textContent='Senha incorreta.';errEl.style.display='block';return;}
+    perfilAtual='gestor';iniciarGestor();
+  } else if(tipo==='diretor'){
+const pw=document.getElementById('inp-diretor').value.trim();
+if(!pw){errEl.textContent='Digite a senha.';errEl.style.display='block';return;}
+if(pw!==(cfg.senhaDiretor||'diretor123')){errEl.textContent='Senha incorreta.';errEl.style.display='block';return;}
+    perfilAtual='diretor';iniciarDiretor();
+  } else {
+const cl=document.getElementById('sel-clinica-login').value;
+const pw=document.getElementById('inp-recepcao').value.trim();
+if(!cl){errEl.textContent='Selecione a clínica.';errEl.style.display='block';return;}
+if(!pw){errEl.textContent='Digite a senha.';errEl.style.display='block';return;}
+const senhaEsp=cfg.senhasClinicas[cl]||'';
+if(!senhaEsp||pw!==senhaEsp){errEl.textContent='Senha incorreta.';errEl.style.display='block';return;}
+    perfilAtual='recepcao';clinicaAtual=cl;iniciarRecepcao(cl);
+  }
+}
+
+function iniciarGestor(){
+  document.getElementById('tela-login').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('user-chip').textContent='👤 Gestor';
+  ['tab-folha','tab-ponto','tab-contas','tab-extrator','tab-cfg'].forEach(id=>{
+const el=document.getElementById(id);if(el)el.style.display='';
+  });
+const agr=hoje();
+  document.getElementById('mes-folha').value=agr.getMonth()+1;
+  document.getElementById('ano-folha').value=agr.getFullYear();
+  document.getElementById('ponto-mes-sel').value=agr.getMonth()+1;
+  document.getElementById('ponto-ano-sel').value=agr.getFullYear();
+  renderCfgSenhas();
+  showPage('folha',document.getElementById('tab-folha'));
+  renderFolha();
+}
+
+function iniciarRecepcao(clinica){
+  document.getElementById('tela-login').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('user-chip').textContent='🏥 '+clinica;
+  ['tab-folha','tab-extrator','tab-cfg'].forEach(id=>{
+const el=document.getElementById(id);if(el)el.style.display='none';
+  });
+  document.getElementById('tab-ponto').style.display='';
+  showPage('ponto',document.getElementById('tab-ponto'));
+  initPontoRecepcao(clinica);
+}
+
+function sair(){
+  perfilAtual='';clinicaAtual='';
+  document.getElementById('app').style.display='none';
+  document.getElementById('tela-login').style.display='flex';
+  document.getElementById('inp-gestor').value='';
+  document.getElementById('inp-recepcao').value='';
+}
+
+// ── NAV ───────────────────────────────────────────────
+function showPage(p,el){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));
+const pg=document.getElementById('page-'+p);if(pg)pg.classList.add('active');
+if(el)el.classList.add('active');
+if(p==='ponto'&&perfilAtual==='gestor')renderPontoGestor();
+if(p==='contas')initContas();
+}
+
+// ── FOLHA ─────────────────────────────────────────────
+let folhaClinicaAtiva=CLINICAS[0];
+
+async function renderFolha(){
+const mes=parseInt(document.getElementById('mes-folha').value);
+const ano=parseInt(document.getElementById('ano-folha').value);
+const k=chave(mes,ano);
+if(!folhaData[k]){const d=await dbGet('folha/'+k);folhaData[k]=d||{};}
+  renderFolhaClinicas(k,mes,ano);
+  renderFolhaTabela(k,mes,ano);
+}
+
+function renderFolhaClinicas(k,mes,ano){
+const el=document.getElementById('folha-clinicas');
+  el.innerHTML=CLINICAS.map(cl=>{
+const itens=Object.values(folhaData[k]?.[cl]||{});
+const total=itens.reduce((s,i)=>{
+const v=parseFloat(i.valor)||0,vt=parseFloat(i.vt)||0,d=parseFloat(i.desc)||0,e=parseFloat(i.extra)||0;
+return s+v+vt-d+e;
+    },0);
+const ativo=cl===folhaClinicaAtiva;
+return`<button class="cl-btn${ativo?' active':''}" onclick="selecionarClinica('${cl}')">
+      <div class="cl-btn-name">${cl}</div>
+      <div class="cl-btn-val">${total>0?fmt(total):'—'}</div>
+    </button>`;
+  }).join('');
+}
+
+function selecionarClinica(cl){
+  folhaClinicaAtiva=cl;
+const mes=parseInt(document.getElementById('mes-folha').value);
+const ano=parseInt(document.getElementById('ano-folha').value);
+const k=chave(mes,ano);
+  renderFolhaClinicas(k,mes,ano);
+  renderFolhaTabela(k,mes,ano);
+}
+
+function renderFolhaTabela(k,mes,ano){
+const el=document.getElementById('folha-tabela');
+const itens=Object.entries(folhaData[k]?.[folhaClinicaAtiva]||{}).map(([id,v])=>({...v,id}));
+let totalGeral=0;
+
+const rows=itens.map(i=>{
+const v=parseFloat(i.valor)||0,vt=parseFloat(i.vt)||0,d=parseFloat(i.desc)||0,e=parseFloat(i.extra)||0;
+const total=v+vt-d+e;totalGeral+=total;
+return`<div class="cargo-row">
+      <span></span>
+      <span><span class="badge badge-${i.tipo==='Médico'?'blue':i.tipo==='Psicólogo'?'green':i.tipo==='Limpeza'?'amber':'gray'}">${i.tipo||'—'}</span></span>
+      <span style="font-weight:500">${i.nome||'—'}</span>
+      <span style="font-family:var(--mono);font-size:12px">${v>0?fmt(v):'—'}</span>
+      <span style="font-family:var(--mono);font-size:12px;color:var(--muted)">${vt>0?'+'+fmt(vt):'—'}</span>
+      <span style="font-family:var(--mono);font-size:12px;color:var(--red)">${d>0?'–'+fmt(d):'—'}</span>
+      <span style="font-family:var(--mono);font-size:12px;color:var(--green)">${e>0?'+'+fmt(e):'—'}</span>
+      <span style="font-family:var(--mono);font-size:12px;font-weight:500">${fmt(total)}</span>
+      <button class="btn btn-sm" onclick="editarCargo('${i.id}')" style="padding:3px 7px;font-size:11px">✏️</button>
+    </div>`;
+  }).join('');
+
+  el.innerHTML=`<div class="card">
+    <div class="card-header">
+      <span class="card-title">${folhaClinicaAtiva} — ${MESES[mes-1]} ${ano}</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-sm" onclick="exportarFolhaPDF()" style="color:var(--red);border-color:var(--red-bd)">📄 PDF</button>
+        <button class="btn btn-sm btn-primary" onclick="abrirModalCargo()">+ Colaborador</button>
+      </div>
+    </div>
+    <div>
+      <div class="cargo-row cargo-row-hdr">
+        <span></span><span>Cargo</span><span>Nome</span>
+        <span>Base</span><span>VT</span><span>Desc.</span><span>Extra</span><span>Total</span><span></span>
+      </div>
+      ${rows||'<div class="empty">Nenhum colaborador cadastrado. Clique em + Colaborador.</div>'}
+    </div>
+    <div class="total-bar">
+      <span style="color:var(--muted);font-size:13px">Total da folha</span>
+      <span class="total-val">${fmt(totalGeral)}</span>
+    </div>
+  </div>`;
+}
+
+// Modal cargo
+function abrirModalCargo(){
+  document.getElementById('cargo-id').value='';
+  document.getElementById('cargo-tipo').value='Recepção';
+  document.getElementById('cargo-nome').value='';
+  document.getElementById('cargo-valor').value='';
+  document.getElementById('cargo-vt').value='';
+  document.getElementById('cargo-desc').value='';
+  document.getElementById('cargo-extra').value='';
+  document.getElementById('modal-cargo-titulo').textContent='Novo colaborador — '+folhaClinicaAtiva;
+  document.getElementById('btn-excluir-cargo').style.display='none';
+  document.getElementById('modal-cargo').classList.add('open');
+}
+
+function editarCargo(id){
+const mes=parseInt(document.getElementById('mes-folha').value);
+const ano=parseInt(document.getElementById('ano-folha').value);
+const k=chave(mes,ano);
+const item=folhaData[k]?.[folhaClinicaAtiva]?.[id];if(!item)return;
+  document.getElementById('cargo-id').value=id;
+  document.getElementById('cargo-tipo').value=item.tipo||'Recepção';
+  document.getElementById('cargo-nome').value=item.nome||'';
+  document.getElementById('cargo-valor').value=item.valor||'';
+  document.getElementById('cargo-vt').value=item.vt||'';
+  document.getElementById('cargo-desc').value=item.desc||'';
+  document.getElementById('cargo-extra').value=item.extra||'';
+  document.getElementById('modal-cargo-titulo').textContent='Editar — '+folhaClinicaAtiva;
+  document.getElementById('btn-excluir-cargo').style.display='inline-flex';
+  document.getElementById('modal-cargo').classList.add('open');
+}
+
+function fecharModalCargo(){document.getElementById('modal-cargo').classList.remove('open');}
+
+async function salvarCargo(){
+const mes=parseInt(document.getElementById('mes-folha').value);
+const ano=parseInt(document.getElementById('ano-folha').value);
+const k=chave(mes,ano);
+const idEx=document.getElementById('cargo-id').value;
+const id=idEx||'c_'+Date.now();
+if(!folhaData[k])folhaData[k]={};
+if(!folhaData[k][folhaClinicaAtiva])folhaData[k][folhaClinicaAtiva]={};
+  folhaData[k][folhaClinicaAtiva][id]={
+    tipo:document.getElementById('cargo-tipo').value,
+    nome:document.getElementById('cargo-nome').value.trim(),
+    valor:parseFloat(document.getElementById('cargo-valor').value)||0,
+    vt:parseFloat(document.getElementById('cargo-vt').value)||0,
+    desc:parseFloat(document.getElementById('cargo-desc').value)||0,
+    extra:parseFloat(document.getElementById('cargo-extra').value)||0,
+  };
+  fecharModalCargo();
+await dbSet('folha/'+k,folhaData[k]);
+  renderFolha();
+}
+
+async function excluirCargo(){
+if(!confirm('Excluir este colaborador?'))return;
+const mes=parseInt(document.getElementById('mes-folha').value);
+const ano=parseInt(document.getElementById('ano-folha').value);
+const k=chave(mes,ano);
+const id=document.getElementById('cargo-id').value;
+if(folhaData[k]?.[folhaClinicaAtiva]?.[id])delete folhaData[k][folhaClinicaAtiva][id];
+  fecharModalCargo();
+await dbSet('folha/'+k,folhaData[k]);
+  renderFolha();
+}
+
+function exportarFolhaPDF(){
+const mes=parseInt(document.getElementById('mes-folha').value);
+const ano=parseInt(document.getElementById('ano-folha').value);
+const k=chave(mes,ano);
+const itens=Object.values(folhaData[k]?.[folhaClinicaAtiva]||{});
+let total=0;
+const rows=itens.map((i,idx)=>{
+const v=parseFloat(i.valor)||0,vt=parseFloat(i.vt)||0,d=parseFloat(i.desc)||0,e=parseFloat(i.extra)||0;
+const t=v+vt-d+e;total+=t;
+return`<tr><td style="padding:8px 10px;border-bottom:1px solid #f0f0ee">${i.tipo||'—'}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f0ee;font-weight:500">${i.nome||'—'}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f0ee;font-family:monospace;text-align:right">${fmt(v)}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f0ee;font-family:monospace;text-align:right;color:#6b6860">${vt>0?'+'+fmt(vt):'—'}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f0ee;font-family:monospace;text-align:right;color:#a32d2d">${d>0?'–'+fmt(d):'—'}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f0ee;font-family:monospace;text-align:right;color:#3b6d11">${e>0?'+'+fmt(e):'—'}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #f0f0ee;font-family:monospace;text-align:right;font-weight:600">${fmt(t)}</td></tr>`;
+  }).join('');
+const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Folha — ${folhaClinicaAtiva}</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:12px;color:#1c1b18;padding:28px}
+.hdr{display:flex;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #534AB7}
+h1{font-size:20px;font-weight:700;color:#534AB7}table{width:100%;border-collapse:collapse}
+thead tr{background:#f7f6f3}th{padding:8px 10px;text-align:left;font-size:10px;font-weight:600;color:#6b6860;text-transform:uppercase;border-bottom:2px solid #e4e1da}
+th.r{text-align:right}tbody tr:nth-child(even){background:#fafaf8}
+.tot{background:#534AB7;color:#fff;border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;margin-top:12px}
+.rodape{margin-top:16px;font-size:10px;color:#a8a59e;text-align:center;border-top:1px solid #e4e1da;padding-top:10px}
+@media print{body{padding:14px}}</style></head><body>
+<div class="hdr"><div><h1>${folhaClinicaAtiva}</h1><p style="font-size:12px;color:#6b6860">Folha de pagamento — ${MESES[mes-1]} de ${ano}</p></div>
+<div style="font-size:11px;color:#a8a59e">Gerado em ${new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</div></div>
+<table><thead><tr><th>Cargo</th><th>Nome</th><th class="r">Base</th><th class="r">VT</th><th class="r">Desconto</th><th class="r">Extra</th><th class="r">Total</th></tr></thead>
+<tbody>${rows}</tbody></table>
+<div class="tot"><span>Total da folha — ${folhaClinicaAtiva}</span><span style="font-size:18px;font-weight:700;font-family:monospace">${fmt(total)}</span></div>
+<div class="rodape">Sistema de Gestão Clínicas — gerado automaticamente</div></body></html>`;
+const w=window.open('','_blank');w.document.write(html);w.document.close();w.focus();setTimeout(()=>w.print(),400);
+}
+
+// ── PONTO ─────────────────────────────────────────────
+async function carregarPonto(mes,ano){
+const k=chave(mes,ano);
+if(!pontoData[k]){const d=await dbGet('ponto/'+k);pontoData[k]=d||{};}
+}
+async function salvarPonto(mes,ano){
+const k=chave(mes,ano);await dbSet('ponto/'+k,pontoData[k]||{});
+}
+
+// GESTOR
+async function renderPontoGestor(){
+  document.getElementById('ponto-gestor').style.display='block';
+  document.getElementById('ponto-recepcao').style.display='none';
+const cl=document.getElementById('ponto-cl-sel').value;
+const mes=parseInt(document.getElementById('ponto-mes-sel').value);
+const ano=parseInt(document.getElementById('ponto-ano-sel').value);
+if(!cl){document.getElementById('ponto-stats').innerHTML='';document.getElementById('ponto-tabela').innerHTML='<div class="empty">Selecione uma clínica.</div>';return;}
+await carregarPonto(mes,ano);
+const k=chave(mes,ano);
+const regCl=pontoData[k]?.[cl]||{};
+const agr=hoje();
+const totalDias=new Date(ano,mes,0).getDate();
+let totalMin=0,diasAtraso=0,diasSaida=0,diasReg=0,rows='';
+
+for(let d=1;d<=totalDias;d++){
+const data=new Date(ano,mes-1,d);
+if(!isDiaUtil(data))continue;
+const fut=data>agr;
+const sem=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][data.getDay()];
+const reg=regCl[d]||{};
+const justif=reg.justif||null;
+if(fut){rows+=`<tr><td style="color:var(--muted);font-size:12px">${d} ${sem}</td><td colspan="5" style="color:var(--hint);font-size:12px;font-style:italic">Ainda não ocorreu</td></tr>`;continue;}
+
+let minP=0;
+if(reg.entrada){const at=h2m(reg.entrada.hora)-h2m(ENTRADA_ESP);if(at>0){minP+=at;diasAtraso++;}}
+if(reg.saida){const at=h2m(SAIDA_ESP)-h2m(reg.saida.hora);if(at>0){minP+=at;diasSaida++;}}
+if(reg.entrada||reg.saida)diasReg++;
+    totalMin-=minP;
+
+let ocorr='Sem registro',oc='var(--red)',ocbg='var(--red-bg)',ocbd='var(--red-bd)';
+if(justif){ocorr=justif.motivo||'Justificado';oc='var(--muted)';ocbg='var(--surface2)';ocbd='var(--border)';}
+    else if(reg.entrada||reg.saida){
+if(minP===0){ocorr='Normal';oc='var(--green)';ocbg='var(--green-bg)';ocbd='var(--green-bd)';}
+      else{const p=[];if(reg.entrada&&h2m(reg.entrada.hora)>h2m(ENTRADA_ESP))p.push('Atraso');if(reg.saida&&h2m(reg.saida.hora)<h2m(SAIDA_ESP))p.push('Saída antecipada');ocorr=p.join(' + ');oc='var(--amber)';ocbg='var(--amber-bg)';ocbd='var(--amber-bd)';}
+    }
+const bg=!reg.entrada&&!reg.saida&&!justif?'background:var(--red-bg)':minP>0?'background:var(--amber-bg)':'';
+const eC=reg.entrada?`<span style="font-family:var(--mono)">${reg.entrada.hora}</span><br><small style="color:var(--muted);font-size:10px">reg. ${reg.entrada.registradaEm}</small>`:'<span style="color:var(--hint)">—</span>';
+const sC=reg.saida?`<span style="font-family:var(--mono)">${reg.saida.hora}</span><br><small style="color:var(--muted);font-size:10px">reg. ${reg.saida.registradaEm}</small>`:'<span style="color:var(--hint)">—</span>';
+    rows+=`<tr style="${bg}">
+      <td style="font-size:12px;color:var(--muted)">${d} ${sem}</td>
+      <td>${eC}</td><td>${sC}</td>
+      <td style="text-align:center"><span style="font-size:11px;padding:2px 8px;border-radius:99px;background:${ocbg};color:${oc};border:1px solid ${ocbd}">${ocorr}</span></td>
+      <td style="font-family:var(--mono);font-size:12px;text-align:center;color:${minP>0?'var(--red)':'var(--muted)'}">${minP>0?'−'+minP+' min':'—'}</td>
+      <td style="font-size:12px;color:var(--muted)">${justif?.obs||''}</td>
+      <td><button class="btn btn-sm" onclick="abrirModalJustif(${d},'${cl}')" style="font-size:11px;padding:3px 8px;color:var(--purple)">${justif?'✏️':'+ Justif.'}</button></td>
+    </tr>`;
+  }
+
+const hh=Math.floor(Math.abs(totalMin)/60),mm=Math.abs(totalMin)%60;
+const totStr=totalMin===0?'—':`−${hh}h ${mm}min`;
+  document.getElementById('ponto-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Dias registrados</div><div class="stat-val">${diasReg}</div></div>
+    <div class="stat-card"><div class="stat-label">Atrasos</div><div class="stat-val" style="color:${diasAtraso>0?'var(--amber)':'var(--green)'}">${diasAtraso}</div></div>
+    <div class="stat-card"><div class="stat-label">Saídas antecipadas</div><div class="stat-val" style="color:${diasSaida>0?'var(--amber)':'var(--green)'}">${diasSaida}</div></div>
+    <div class="stat-card"><div class="stat-label">Total perdido</div><div class="stat-val" style="color:${totalMin<0?'var(--red)':'var(--green)'};font-size:18px">${totStr}</div></div>
+  `;
+  document.getElementById('ponto-tabela').innerHTML=`<div class="card">
+    <div class="card-header">
+      <span class="card-title">${cl} — ${MESES[mes-1]} ${ano} · Entrada: ${ENTRADA_ESP} · Saída: ${SAIDA_ESP}</span>
+    </div>
+    <div style="overflow-x:auto"><table class="tbl">
+      <thead><tr><th>Dia</th><th>Entrada</th><th>Saída</th><th style="text-align:center">Ocorrência</th><th style="text-align:center">Minutos</th><th>Observação</th><th></th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+    <div class="total-bar"><span>Total perdido no mês</span><span class="total-val" style="color:${totalMin<0?'var(--red)':'var(--green)'}">${totStr}</span></div>
+  </div>`;
+}
+
+// RECEPÇÃO
+async function initPontoRecepcao(clinica){
+  document.getElementById('ponto-gestor').style.display='none';
+  document.getElementById('ponto-recepcao').style.display='block';
+const agr=hoje();
+const sem=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+  document.getElementById('ponto-rec-data').textContent=sem[agr.getDay()]+', '+agr.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+  document.getElementById('ponto-rec-clinica').textContent=clinica;
+const mes=agr.getMonth()+1,ano=agr.getFullYear();
+await carregarPonto(mes,ano);
+  renderPontoRecepcao(clinica,mes,ano);
+}
+
+function renderPontoRecepcao(cl,mes,ano){
+const area=document.getElementById('ponto-rec-area');
+const agr=hoje();
+if(!isDiaUtil(agr)){area.innerHTML=`<div style="padding:1rem;background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:var(--r);font-size:13px;color:var(--amber)">🏖️ Fim de semana — sem registro de ponto.</div>`;return;}
+const dia=agr.getDate();
+const k=chave(mes,ano);
+const reg=pontoData[k]?.[cl]?.[dia]||{};
+const temE=!!reg.entrada,temS=!!reg.saida;
+const janE=dentroJanela(JAN_E_INI,JAN_E_FIM);
+const janS=dentroJanela(JAN_S_INI,JAN_S_FIM);
+let html='';
+
+// ENTRADA
+if(temE){
+    html+=`<div style="background:var(--green-bg);border:1px solid var(--green-bd);border-radius:var(--r-lg);padding:1.25rem;margin-bottom:12px;text-align:center">
+      <div style="font-size:12px;color:var(--green);font-weight:500;margin-bottom:4px">✅ Entrada registrada</div>
+      <div style="font-size:36px;font-weight:700;font-family:var(--mono);color:var(--green)">${reg.entrada.hora}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Registrado às ${reg.entrada.registradaEm}</div>
+    </div>`;
+  } else if(janE){
+    html+=`<div style="margin-bottom:12px">
+      <div style="font-size:13px;font-weight:500;margin-bottom:6px;color:var(--text)">🕐 Registrar entrada</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Janela das ${JAN_E_INI} às ${JAN_E_FIM}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Horário de chegada</div>
+      <input type="time" id="inp-e" value="${agora()}" class="ponto-inp-time">
+      <button class="btn btn-primary btn-full" onclick="registrarPontoRec('entrada')">✓ Confirmar entrada</button>
+    </div>`;
+  } else if(!temE){
+    html+=`<div style="background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:var(--r);padding:1rem;margin-bottom:12px;text-align:center;font-size:13px;color:var(--amber)">⚠️ Janela de entrada encerrada — solicite justificativa ao gestor</div>`;
+  }
+
+// SAÍDA
+if(temS){
+    html+=`<div style="background:var(--green-bg);border:1px solid var(--green-bd);border-radius:var(--r-lg);padding:1.25rem;text-align:center">
+      <div style="font-size:12px;color:var(--green);font-weight:500;margin-bottom:4px">✅ Saída registrada</div>
+      <div style="font-size:36px;font-weight:700;font-family:var(--mono);color:var(--green)">${reg.saida.hora}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Registrado às ${reg.saida.registradaEm}</div>
+    </div>`;
+  } else if(janS&&temE){
+    html+=`<div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:6px;color:var(--text)">🕔 Registrar saída</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Janela das ${JAN_S_INI} às ${JAN_S_FIM}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Horário de saída</div>
+      <input type="time" id="inp-s" value="${agora()}" class="ponto-inp-time">
+      <button class="btn btn-primary btn-full" onclick="registrarPontoRec('saida')">✓ Confirmar saída</button>
+    </div>`;
+  } else if(!temS&&h2m(agora())>h2m(JAN_S_FIM)){
+    html+=`<div style="background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:var(--r);padding:1rem;text-align:center;font-size:13px;color:var(--amber)">⚠️ Janela de saída encerrada — solicite justificativa ao gestor</div>`;
+  }
+
+  area.innerHTML=html;
+}
+
+async function registrarPontoRec(tipo){
+const agr=hoje();
+const dia=agr.getDate(),mes=agr.getMonth()+1,ano=agr.getFullYear();
+const k=chave(mes,ano);
+const horaDecl=document.getElementById(tipo==='entrada'?'inp-e':'inp-s')?.value;
+if(!horaDecl){alert('Informe o horário.');return;}
+if(!pontoData[k])pontoData[k]={};
+if(!pontoData[k][clinicaAtual])pontoData[k][clinicaAtual]={};
+if(!pontoData[k][clinicaAtual][dia])pontoData[k][clinicaAtual][dia]={};
+  pontoData[k][clinicaAtual][dia][tipo]={hora:horaDecl,registradaEm:agora(),timestamp:Date.now()};
+await salvarPonto(mes,ano);
+  renderPontoRecepcao(clinicaAtual,mes,ano);
+}
+
+// Modal justif gestor
+function abrirModalJustif(dia,cl){
+const mes=parseInt(document.getElementById('ponto-mes-sel').value);
+const ano=parseInt(document.getElementById('ponto-ano-sel').value);
+const k=chave(mes,ano);
+const reg=pontoData[k]?.[cl]?.[dia]||{};
+const justif=reg.justif||{};
+  document.getElementById('jf-clinica').value=cl;
+  document.getElementById('jf-dia').value=dia;
+  document.getElementById('jf-entrada').value=justif.entrada||reg.entrada?.hora||'';
+  document.getElementById('jf-saida').value=justif.saida||reg.saida?.hora||'';
+  document.getElementById('jf-motivo').value=justif.motivo||'';
+  document.getElementById('jf-obs').value=justif.obs||'';
+  document.getElementById('modal-justif-titulo').textContent=(reg.entrada||reg.saida?'Editar':'Registrar')+' — dia '+dia;
+  document.getElementById('btn-remover-justif').style.display=(reg.entrada||reg.saida||justif.motivo)?'inline-flex':'none';
+  document.getElementById('modal-justif').classList.add('open');
+}
+
+function fecharModalJustif(){document.getElementById('modal-justif').classList.remove('open');}
+
+async function salvarJustif(){
+const mes=parseInt(document.getElementById('ponto-mes-sel').value);
+const ano=parseInt(document.getElementById('ponto-ano-sel').value);
+const k=chave(mes,ano);
+const cl=document.getElementById('jf-clinica').value;
+const dia=parseInt(document.getElementById('jf-dia').value);
+const motivo=document.getElementById('jf-motivo').value;
+if(!motivo){alert('Selecione a justificativa.');return;}
+if(!pontoData[k])pontoData[k]={};
+if(!pontoData[k][cl])pontoData[k][cl]={};
+if(!pontoData[k][cl][dia])pontoData[k][cl][dia]={};
+  pontoData[k][cl][dia].justif={motivo,obs:document.getElementById('jf-obs').value,timestamp:Date.now()};
+const he=document.getElementById('jf-entrada').value;
+const hs=document.getElementById('jf-saida').value;
+if(he&&!pontoData[k][cl][dia].entrada)pontoData[k][cl][dia].entrada={hora:he,registradaEm:'gestor',timestamp:Date.now()};
+if(hs&&!pontoData[k][cl][dia].saida)pontoData[k][cl][dia].saida={hora:hs,registradaEm:'gestor',timestamp:Date.now()};
+  fecharModalJustif();
+await salvarPonto(mes,ano);
+  renderPontoGestor();
+}
+
+async function removerPontoDia(){
+if(!confirm('Remover registro deste dia?'))return;
+const mes=parseInt(document.getElementById('ponto-mes-sel').value);
+const ano=parseInt(document.getElementById('ponto-ano-sel').value);
+const k=chave(mes,ano);
+const cl=document.getElementById('jf-clinica').value;
+const dia=parseInt(document.getElementById('jf-dia').value);
+if(pontoData[k]?.[cl]?.[dia])delete pontoData[k][cl][dia];
+  fecharModalJustif();
+await salvarPonto(mes,ano);
+  renderPontoGestor();
+}
+
+function exportarPontoPDF(){
+const cl=document.getElementById('ponto-cl-sel').value;if(!cl)return;
+const mes=parseInt(document.getElementById('ponto-mes-sel').value);
+const ano=parseInt(document.getElementById('ponto-ano-sel').value);
+const k=chave(mes,ano);const regCl=pontoData[k]?.[cl]||{};
+const agr=hoje();let totalMin=0,rows='';
+const totalDias=new Date(ano,mes,0).getDate();
+for(let d=1;d<=totalDias;d++){
+const data=new Date(ano,mes-1,d);if(!isDiaUtil(data)||data>agr)continue;
+const sem=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][data.getDay()];
+const reg=regCl[d]||{};const justif=reg.justif||null;let minP=0;
+if(reg.entrada){const at=h2m(reg.entrada.hora)-h2m(ENTRADA_ESP);if(at>0)minP+=at;}
+if(reg.saida){const at=h2m(SAIDA_ESP)-h2m(reg.saida.hora);if(at>0)minP+=at;}
+const ocorr=justif?justif.motivo:reg.entrada||reg.saida?minP>0?'Irregularidade':'Normal':'Sem registro';
+    totalMin-=minP;
+    rows+=`<tr><td style="padding:7px 10px;border-bottom:1px solid #f0f0ee;font-size:11px;color:#888">${d} ${sem}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid #f0f0ee;font-family:monospace;font-size:12px">${reg.entrada?.hora||'—'}<br><span style="font-size:10px;color:#aaa">${reg.entrada?.registradaEm?'reg. '+reg.entrada.registradaEm:''}</span></td>
+      <td style="padding:7px 10px;border-bottom:1px solid #f0f0ee;font-family:monospace;font-size:12px">${reg.saida?.hora||'—'}<br><span style="font-size:10px;color:#aaa">${reg.saida?.registradaEm?'reg. '+reg.saida.registradaEm:''}</span></td>
+      <td style="padding:7px 10px;border-bottom:1px solid #f0f0ee;font-size:11px;color:${ocorr==='Normal'?'#3b6d11':ocorr==='Sem registro'?'#a32d2d':'#854f0b'}">${ocorr}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid #f0f0ee;font-family:monospace;font-size:11px;color:${minP>0?'#a32d2d':'#888'}">${minP>0?'−'+minP+' min':'—'}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid #f0f0ee;font-size:11px;color:#888">${justif?.obs||''}</td></tr>`;
+  }
+const hh=Math.floor(Math.abs(totalMin)/60),mm=Math.abs(totalMin)%60;
+const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Ponto — ${cl}</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:12px;color:#1c1b18;padding:28px}
+.hdr{display:flex;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #534AB7}
+h1{font-size:20px;font-weight:700;color:#534AB7}table{width:100%;border-collapse:collapse}
+thead tr{background:#f7f6f3}th{padding:8px 10px;text-align:left;font-size:10px;font-weight:600;color:#6b6860;text-transform:uppercase;border-bottom:2px solid #e4e1da}
+tbody tr:nth-child(even){background:#fafaf8}
+.tot{background:#534AB7;color:#fff;border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;margin-top:12px}
+.rodape{margin-top:16px;font-size:10px;color:#a8a59e;text-align:center;border-top:1px solid #e4e1da;padding-top:10px}
+@media print{body{padding:14px}}</style></head><body>
+<div class="hdr"><div><h1>${cl}</h1><p style="font-size:12px;color:#6b6860">Controle de ponto — ${MESES[mes-1]} de ${ano}</p><p style="font-size:11px;color:#a8a59e">Entrada: ${ENTRADA_ESP} · Saída: ${SAIDA_ESP}</p></div>
+<div style="font-size:11px;color:#a8a59e">Gerado em ${new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</div></div>
+<table><thead><tr><th>Dia</th><th>Entrada</th><th>Saída</th><th>Ocorrência</th><th>Minutos</th><th>Observação</th></tr></thead><tbody>${rows}</tbody></table>
+<div class="tot"><span>Total perdido — ${MESES[mes-1]} ${ano}</span><span style="font-size:18px;font-weight:700;font-family:monospace">${totalMin<0?'−'+hh+'h '+mm+'min':'—'}</span></div>
+<div class="rodape">Sistema de Gestão Clínicas — gerado automaticamente</div></body></html>`;
+const w=window.open('','_blank');w.document.write(html);w.document.close();w.focus();setTimeout(()=>w.print(),400);
+}
+
+// ── CONFIG ────────────────────────────────────────────
+function renderCfgSenhas(){
+const el=document.getElementById('cfg-senhas-clinicas');
+  el.innerHTML=CLINICAS.map(cl=>`
+    <div class="clinica-senha-row">
+      <label>${cl}</label>
+      <input type="text" placeholder="Senha..." value="${cfg.senhasClinicas[cl]||''}" style="padding:6px 10px;font-size:12px;border:1px solid var(--border);border-radius:var(--r);font-family:var(--mono)"
+        oninput="cfg.senhasClinicas['${cl}']=this.value.trim()">
+    </div>`).join('');
+}
+
+async function salvarSenhaGestor(){
+const pw=document.getElementById('cfg-senha-gestor').value.trim();
+const pwd=document.getElementById('cfg-senha-diretor').value.trim();
+if(!pw&&!pwd){alert('Digite pelo menos uma senha.');return;}
+if(pw)cfg.senhaGestor=pw;
+if(pwd)cfg.senhaDiretor=pwd;
+await dbSet('cfg',cfg);
+  document.getElementById('cfg-senha-gestor').value='';
+  document.getElementById('cfg-senha-diretor').value='';
+  alert('✅ Senhas salvas!');
+}
+
+async function salvarSenhasClinicas(){
+await dbSet('cfg',cfg);
+  alert('✅ Senhas das clínicas salvas!');
+}
+
+function exportarBackup(){
+const backup={versao:'1.0',exportadoEm:new Date().toLocaleString('pt-BR'),cfg,folhaData,pontoData};
+const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+const url=URL.createObjectURL(blob);const a=document.createElement('a');
+const d=new Date().toLocaleDateString('pt-BR').replace(/\//g,'_');
+  a.href=url;a.download=`backup_clinicas_${d}.json`;a.click();URL.revokeObjectURL(url);
+  localStorage.setItem('ultimo_backup',new Date().toLocaleString('pt-BR'));
+  document.getElementById('ultimo-backup').textContent=new Date().toLocaleString('pt-BR');
+}
+
+async function importarBackup(inp){
+const file=inp.files[0];if(!file)return;
+if(!confirm('Importar backup? Isso substituirá todos os dados atuais.'))return;
+const reader=new FileReader();
+  reader.onload=async e=>{
+    try{
+const bk=JSON.parse(e.target.result);
+if(bk.cfg){cfg=Object.assign(cfg,bk.cfg);await dbSet('cfg',cfg);}
+if(bk.folhaData){folhaData=bk.folhaData;for(const k of Object.keys(folhaData))await dbSet('folha/'+k,folhaData[k]);}
+if(bk.pontoData){pontoData=bk.pontoData;for(const k of Object.keys(pontoData))await dbSet('ponto/'+k,pontoData[k]);}
+      alert('✅ Backup restaurado!');renderCfgSenhas();
+    }catch(err){alert('Erro: '+err.message);}
+  };
+  reader.readAsText(file);inp.value='';
+}
+
+// ── EMAILJS ───────────────────────────────────────────
+const EJS_SVC='service_rrvigcl';
+const EJS_TPL='template_loaw4wm';
+const EJS_KEY='9_sWrO7qr5CGeK8ru';
+const NOTIF_EMAIL='notificacoes.clinicas@gmail.com';
+
+async function verificarNotificacoes(){
+// Roda uma vez por sessão — verifica contas vencidas ontem não pagas
+const agora=hoje();
+const ontem=new Date(agora);ontem.setDate(ontem.getDate()-1);
+const ontemStr=ontem.toISOString().split('T')[0];
+const mes=ontem.getMonth()+1,ano=ontem.getFullYear();
+const k=chave(mes,ano);
+if(!contasData[k]){const d=await dbGet('contas/'+k);contasData[k]=d||{};}
+const vencidas=[];
+  CLINICAS.forEach(cl=>{
+const itens=Object.values(contasData[k]?.[cl]||{});
+    itens.forEach(c=>{
+if(!c.pago&&c.venc&&c.venc===ontemStr&&!c.padrao&&c.desc){
+        vencidas.push(`• ${cl} — ${c.desc} — R$ ${parseFloat(c.valor||0).toFixed(2).replace('.',',')} (venceu ${ontem.toLocaleDateString('pt-BR')})`);
+      }
+    });
+  });
+if(!vencidas.length)return;
+  try{
+    emailjs.init(EJS_KEY);
+await emailjs.send(EJS_SVC,EJS_TPL,{
+      to_email:NOTIF_EMAIL,
+      data:agora.toLocaleDateString('pt-BR'),
+      contas:vencidas.join('\n'),
+      name:'Sistema Clínicas'
+    });
+    console.log('Notificação enviada:',vencidas.length,'conta(s)');
+  }catch(e){console.warn('EmailJS erro:',e);}
+}
+
+// ── CONTAS A PAGAR ────────────────────────────────────
+const CONTAS_PADRAO=['Copel','Sanepar','Internet','Aluguel','Diarista','CIEE','Sapiens','Pedido de Material'];
+let contasData={};
+let contasClinicaAtiva=CLINICAS[0];
+
+async function initContas(){
+const mes=parseInt(document.getElementById('mes-contas').value);
+const ano=parseInt(document.getElementById('ano-contas').value);
+const k=chave(mes,ano);
+if(!contasData[k]){const d=await dbGet('contas/'+k);contasData[k]=d||{};}
+// Badge perfil
+const badge=document.getElementById('contas-perfil-badge');
+if(badge){
+if(perfilAtual==='gestor'){badge.innerHTML='<span class="badge badge-purple">Gestor — pode editar</span>';}
+    else if(perfilAtual==='diretor'){badge.innerHTML='<span class="badge badge-gray">Diretor — somente visualização e pagamento</span>';}
+  }
+  renderContasTabs(k,mes,ano);
+  renderContasTabela(k,mes,ano);
+  renderContasStats(k);
+}
+
+async function trocarMesContas(){
+const mes=parseInt(document.getElementById('mes-contas').value);
+const ano=parseInt(document.getElementById('ano-contas').value);
+const k=chave(mes,ano);
+if(!contasData[k]){const d=await dbGet('contas/'+k);contasData[k]=d||{};}
+  renderContasTabs(k,mes,ano);
+  renderContasTabela(k,mes,ano);
+  renderContasStats(k);
+}
+
+function renderContasStats(k){
+const el=document.getElementById('contas-stats');if(!el)return;
+let total=0,pago=0,pendente=0,vencidas=0;
+const hoje_str=hoje().toISOString().split('T')[0];
+  CLINICAS.forEach(cl=>{
+    Object.values(contasData[k]?.[cl]||{}).forEach(c=>{
+if(c.padrao||!c.desc)return;
+const v=parseFloat(c.valor)||0;
+      total+=v;
+if(c.pago){pago+=v;}
+      else{
+        pendente+=v;
+if(c.venc&&c.venc<hoje_str)vencidas++;
+      }
+    });
+  });
+  el.innerHTML=`
+    <div class="stat-card"><div class="stat-label">Total do mês</div><div class="stat-val">${fmt(total)}</div></div>
+    <div class="stat-card"><div class="stat-label">Pago</div><div class="stat-val" style="color:var(--green)">${fmt(pago)}</div></div>
+    <div class="stat-card"><div class="stat-label">Pendente</div><div class="stat-val" style="color:var(--amber)">${fmt(pendente)}</div></div>
+    <div class="stat-card"><div class="stat-label">Vencidas</div><div class="stat-val" style="color:var(--red)">${vencidas}</div></div>
+  `;
+}
+
+function renderContasTabs(k,mes,ano){
+const el=document.getElementById('contas-clinica-tabs');if(!el)return;
+const hoje_str=hoje().toISOString().split('T')[0];
+  el.innerHTML=CLINICAS.map(cl=>{
+const itens=Object.values(contasData[k]?.[cl]||{}).filter(c=>!c.padrao&&c.desc);
+const total=itens.reduce((s,c)=>s+(parseFloat(c.valor)||0),0);
+const temVenc=itens.some(c=>!c.pago&&c.venc&&c.venc<hoje_str);
+const ativo=cl===contasClinicaAtiva;
+return`<button class="cl-btn${ativo?' active':''}" onclick="selecionarClinicaContas('${cl}')" style="${temVenc&&!ativo?'border-color:var(--red);color:var(--red)':''}">
+      <div class="cl-btn-name">${cl}${temVenc?' ⚠':''}</div>
+      <div class="cl-btn-val">${total>0?fmt(total):'—'}</div>
+    </button>`;
+  }).join('');
+}
+
+function selecionarClinicaContas(cl){
+  contasClinicaAtiva=cl;
+const mes=parseInt(document.getElementById('mes-contas').value);
+const ano=parseInt(document.getElementById('ano-contas').value);
+const k=chave(mes,ano);
+  renderContasTabs(k,mes,ano);
+  renderContasTabela(k,mes,ano);
+}
+
+function renderContasTabela(k,mes,ano){
+const el=document.getElementById('contas-tabela');if(!el)return;
+const hoje_str=hoje().toISOString().split('T')[0];
+const amanha=new Date(hoje());amanha.setDate(amanha.getDate()+1);
+const amanha_str=amanha.toISOString().split('T')[0];
+const isGestor=perfilAtual==='gestor';
+
+// Garante itens padrão
+if(!contasData[k])contasData[k]={};
+if(!contasData[k][contasClinicaAtiva])contasData[k][contasClinicaAtiva]={};
+
+// Monta lista: padrão + extras
+const existentes=contasData[k][contasClinicaAtiva];
+const porDesc={};
+  Object.entries(existentes).forEach(([id,c])=>{if(c.desc)porDesc[c.desc]={...c,id};});
+
+// Linhas padrão
+const linhas=CONTAS_PADRAO.map(desc=>{
+const c=porDesc[desc]||{desc,padrao:true};
+return{...c,desc,_padrao:!porDesc[desc]};
+  });
+// Extras (não padrão)
+  Object.entries(existentes).forEach(([id,c])=>{
+if(c.desc&&!CONTAS_PADRAO.includes(c.desc))linhas.push({...c,id,_padrao:false});
+  });
+
+let totalGeral=0;
+const rows=linhas.map(c=>{
+const venc=c.venc||'';
+const valor=parseFloat(c.valor)||0;
+const isVenc=venc&&venc<hoje_str&&!c.pago;
+const isAmanha=venc===amanha_str&&!c.pago;
+if(!c._padrao)totalGeral+=valor;
+
+// Status badge
+let statusHtml='<span style="font-size:11px;color:var(--hint)">—</span>';
+if(!c._padrao){
+if(c.pago){statusHtml=`<span class="badge badge-green">✓ Pago</span>`;}
+      else if(isVenc){statusHtml=`<span class="badge badge-red">⚠ Vencida</span>`;}
+      else if(isAmanha){statusHtml=`<span class="badge badge-amber">🔔 Amanhã</span>`;}
+      else{statusHtml=`<span class="badge badge-gray">Pendente</span>`;}
+    }
+
+// PDF
+const pdfHtml=c.pdf
+      ?`<a href="${c.pdf}" target="_blank" style="font-size:11px;padding:3px 8px;border-radius:var(--r);background:var(--blue-bg);color:var(--blue);border:1px solid #b5d4f4;text-decoration:none">📄 Abrir</a>`
+      :'<span style="color:var(--hint);font-size:12px">—</span>';
+
+// Ações
+let acoesHtml='';
+if(isGestor){
+      acoesHtml=`<button class="btn btn-sm" onclick="editarConta('${c.id||''}','${c.desc}')" style="font-size:11px;padding:3px 7px">${c._padrao?'+ Preencher':'✏️'}</button>`;
+    } else if(!c._padrao&&!c.pago){
+// Diretor pode marcar como pago
+      acoesHtml=`<button class="btn btn-sm" onclick="marcarPago('${c.id}','${c.desc}')" style="font-size:11px;padding:3px 10px;color:var(--green);border-color:var(--green-bd)">✓ Marcar pago</button>`;
+    }
+
+const rowBg=c._padrao?'opacity:.55;':isVenc?'background:var(--red-bg);':'';
+return`<tr style="${rowBg}">
+      <td style="padding:9px 12px;border-bottom:1px solid var(--surface2);font-weight:${c._padrao?'400':'500'}">${c.desc}</td>
+      <td style="padding:9px 12px;border-bottom:1px solid var(--surface2);color:${isVenc?'var(--red)':isAmanha?'var(--amber)':'var(--text)'};font-weight:${isVenc||isAmanha?'500':'400'}">${venc?new Date(venc+'T12:00:00').toLocaleDateString('pt-BR'):'—'}</td>
+      <td style="padding:9px 12px;border-bottom:1px solid var(--surface2);font-family:var(--mono);font-size:12px;text-align:right">${valor>0?fmt(valor):'—'}</td>
+      <td style="padding:9px 12px;border-bottom:1px solid var(--surface2)">${pdfHtml}</td>
+      <td style="padding:9px 12px;border-bottom:1px solid var(--surface2);text-align:center">${statusHtml}</td>
+      <td style="padding:9px 12px;border-bottom:1px solid var(--surface2);font-size:12px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.obs||'—'}</td>
+      <td style="padding:9px 12px;border-bottom:1px solid var(--surface2);text-align:right">${acoesHtml}</td>
+    </tr>`;
+  }).join('');
+
+const btnNova=isGestor?`<button class="btn btn-sm btn-primary" onclick="abrirModalConta()">+ Nova conta</button>`:'';
+const btnPdf=`<button class="btn btn-sm" onclick="exportarContasPDF('${contasClinicaAtiva}',${mes},${ano})" style="color:var(--red);border-color:var(--red-bd)">📄 PDF</button>`;
+
+  el.innerHTML=`<div class="card">
+    <div class="card-header">
+      <span class="card-title">${contasClinicaAtiva} — ${MESES[mes-1]} ${ano}</span>
+      <div style="display:flex;gap:8px">${btnPdf}${btnNova}</div>
+    </div>
+    <div style="overflow-x:auto"><table class="tbl">
+      <thead><tr>
+        <th>Descrição</th><th>Vencimento</th><th style="text-align:right">Valor</th>
+        <th>PDF</th><th style="text-align:center">Status</th><th>Observação</th><th></th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+    <div class="total-bar"><span>Total do mês</span><span class="total-val">${fmt(totalGeral)}</span></div>
+  </div>`;
+}
+
+function abrirModalConta(desc='',id=''){
+  document.getElementById('conta-id').value=id;
+  document.getElementById('conta-desc').value=desc;
+  document.getElementById('conta-venc').value='';
+  document.getElementById('conta-valor').value='';
+  document.getElementById('conta-pdf').value='';
+  document.getElementById('conta-obs').value='';
+// Se editando, preenche dados existentes
+if(id){
+const mes=parseInt(document.getElementById('mes-contas').value);
+const ano=parseInt(document.getElementById('ano-contas').value);
+const k=chave(mes,ano);
+const c=contasData[k]?.[contasClinicaAtiva]?.[id];
+if(c){
+      document.getElementById('conta-desc').value=c.desc||desc;
+      document.getElementById('conta-venc').value=c.venc||'';
+      document.getElementById('conta-valor').value=c.valor||'';
+      document.getElementById('conta-pdf').value=c.pdf||'';
+      document.getElementById('conta-obs').value=c.obs||'';
+    }
+    document.getElementById('btn-excluir-conta').style.display='inline-flex';
+  } else {
+    document.getElementById('btn-excluir-conta').style.display='none';
+  }
+  document.getElementById('modal-conta-titulo').textContent=(id?'Editar':'Nova')+' conta — '+contasClinicaAtiva;
+  document.getElementById('modal-conta').classList.add('open');
+}
+
+function editarConta(id,desc){
+  abrirModalConta(desc,id);
+}
+
+function fecharModalConta(){document.getElementById('modal-conta').classList.remove('open');}
+
+async function salvarConta(){
+const desc=document.getElementById('conta-desc').value.trim();
+if(!desc){alert('Digite a descrição.');return;}
+const mes=parseInt(document.getElementById('mes-contas').value);
+const ano=parseInt(document.getElementById('ano-contas').value);
+const k=chave(mes,ano);
+const idEx=document.getElementById('conta-id').value;
+const id=idEx||'ct_'+Date.now();
+if(!contasData[k])contasData[k]={};
+if(!contasData[k][contasClinicaAtiva])contasData[k][contasClinicaAtiva]={};
+const exist=contasData[k][contasClinicaAtiva][idEx]||{};
+  contasData[k][contasClinicaAtiva][id]={
+    desc,
+    venc:document.getElementById('conta-venc').value,
+    valor:parseFloat(document.getElementById('conta-valor').value)||0,
+    pdf:document.getElementById('conta-pdf').value.trim(),
+    obs:document.getElementById('conta-obs').value.trim(),
+    pago:exist.pago||false,
+    dataPago:exist.dataPago||null,
+  };
+  fecharModalConta();
+await dbSet('contas/'+k,contasData[k]);
+  renderContasTabela(k,mes,ano);
+  renderContasTabs(k,mes,ano);
+  renderContasStats(k);
+}
+
+async function excluirConta(){
+if(!confirm('Excluir esta conta?'))return;
+const mes=parseInt(document.getElementById('mes-contas').value);
+const ano=parseInt(document.getElementById('ano-contas').value);
+const k=chave(mes,ano);
+const id=document.getElementById('conta-id').value;
+if(contasData[k]?.[contasClinicaAtiva]?.[id])delete contasData[k][contasClinicaAtiva][id];
+  fecharModalConta();
+await dbSet('contas/'+k,contasData[k]);
+  renderContasTabela(k,mes,ano);
+  renderContasTabs(k,mes,ano);
+  renderContasStats(k);
+}
+
+async function marcarPago(id,desc){
+if(!confirm(`Marcar "${desc}" como paga?`))return;
+const mes=parseInt(document.getElementById('mes-contas').value);
+const ano=parseInt(document.getElementById('ano-contas').value);
+const k=chave(mes,ano);
+if(!contasData[k]?.[contasClinicaAtiva]?.[id])return;
+  contasData[k][contasClinicaAtiva][id].pago=true;
+  contasData[k][contasClinicaAtiva][id].dataPago=hoje().toLocaleDateString('pt-BR');
+await dbSet('contas/'+k,contasData[k]);
+  renderContasTabela(k,mes,ano);
+  renderContasTabs(k,mes,ano);
+  renderContasStats(k);
+}
+
+function exportarContasPDF(clinica,mes,ano){
+const k=chave(mes,ano);
+const hoje_str=hoje().toISOString().split('T')[0];
+const itens=Object.values(contasData[k]?.[clinica]||{}).filter(c=>c.desc&&!c._padrao);
+const PADRAO=['Copel','Sanepar','Internet','Aluguel','Diarista','CIEE','Sapiens','Pedido de Material'];
+  itens.sort((a,b)=>{const ia=PADRAO.indexOf(a.desc),ib=PADRAO.indexOf(b.desc);if(ia>=0&&ib>=0)return ia-ib;if(ia>=0)return-1;if(ib>=0)return 1;return(a.desc||'').localeCompare(b.desc||'');});
+let total=0;
+const rows=itens.map(c=>{
+const v=parseFloat(c.valor)||0;total+=v;
+const isV=c.venc&&c.venc<hoje_str&&!c.pago;
+const vStr=c.venc?new Date(c.venc+'T12:00:00').toLocaleDateString('pt-BR'):'—';
+const status=c.pago?'Pago':isV?'Vencida':'Pendente';
+const cor=c.pago?'#3b6d11':isV?'#a32d2d':'#854f0b';
+return`<tr><td style="padding:8px 10px;border-bottom:1px solid #f0f0ee;font-weight:500">${c.desc}</td><td style="padding:8px 10px;border-bottom:1px solid #f0f0ee">${vStr}</td><td style="padding:8px 10px;border-bottom:1px solid #f0f0ee;font-family:monospace;text-align:right">${v>0?fmt(v):'—'}</td><td style="padding:8px 10px;border-bottom:1px solid #f0f0ee;color:${cor};font-weight:500">${status}</td><td style="padding:8px 10px;border-bottom:1px solid #f0f0ee;font-size:11px;color:#888">${c.obs||'—'}</td></tr>`;
+  }).join('');
+const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Contas — ${clinica}</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:12px;color:#1c1b18;padding:28px}.hdr{display:flex;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #534AB7}h1{font-size:20px;font-weight:700;color:#534AB7}table{width:100%;border-collapse:collapse}thead tr{background:#f7f6f3}th{padding:8px 10px;text-align:left;font-size:10px;font-weight:600;color:#6b6860;text-transform:uppercase;border-bottom:2px solid #e4e1da}th.r{text-align:right}tbody tr:nth-child(even){background:#fafaf8}.tot{background:#534AB7;color:#fff;border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;margin-top:12px}.rodape{margin-top:16px;font-size:10px;color:#a8a59e;text-align:center;border-top:1px solid #e4e1da;padding-top:10px}@media print{body{padding:14px}}</style></head><body><div class="hdr"><div><h1>${clinica}</h1><p style="font-size:12px;color:#6b6860">Contas a pagar — ${MESES[mes-1]} de ${ano}</p></div><div style="font-size:11px;color:#a8a59e">Gerado em ${new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</div></div><table><thead><tr><th>Descrição</th><th>Vencimento</th><th class="r">Valor</th><th>Status</th><th>Observação</th></tr></thead><tbody>${rows}</tbody></table><div class="tot"><span>Total — ${clinica}</span><span style="font-size:18px;font-weight:700;font-family:monospace">${fmt(total)}</span></div><div class="rodape">Sistema de Gestão Clínicas — gerado automaticamente</div></body></html>`;
+const w=window.open('','_blank');w.document.write(html);w.document.close();w.focus();setTimeout(()=>w.print(),400);
+}
+
+// ── DIRETOR LOGIN ─────────────────────────────────────
+function iniciarDiretor(){
+  document.getElementById('tela-login').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('user-chip').textContent='👔 Diretor';
+// Diretor só vê Contas
+  ['tab-folha','tab-ponto','tab-extrator','tab-cfg'].forEach(id=>{
+const el=document.getElementById(id);if(el)el.style.display='none';
+  });
+  document.getElementById('tab-contas').style.display='';
+const agr=hoje();
+  document.getElementById('mes-contas').value=agr.getMonth()+1;
+  document.getElementById('ano-contas').value=agr.getFullYear();
+  showPage('contas',document.getElementById('tab-contas'));
+  initContas();
+}
+
+// ── EXPÕE CONTAS GLOBALMENTE ──────────────────────────
+Object.assign(window,{
+  setLoginTipo,entrar,sair,showPage,
+  renderFolha,selecionarClinica,abrirModalCargo,editarCargo,fecharModalCargo,salvarCargo,excluirCargo,exportarFolhaPDF,
+  renderPontoGestor,registrarPontoRec,abrirModalJustif,fecharModalJustif,salvarJustif,removerPontoDia,exportarPontoPDF,
+  trocarMesContas,selecionarClinicaContas,abrirModalConta,editarConta,fecharModalConta,salvarConta,excluirConta,marcarPago,exportarContasPDF,
+  salvarSenhaGestor,salvarSenhasClinicas,exportarBackup,importarBackup,
+});
+
+// ── INIT ─────────────────────────────────────────────
+// Verifica notificações ao iniciar (roda uma vez por dia)
+const _ujn=localStorage.getItem('cl_notif_dt');const _hj=new Date().toDateString();if(_ujn!==_hj){localStorage.setItem('cl_notif_dt',_hj);setTimeout(()=>{if(typeof emailjs!=='undefined')verificarNotificacoes();},3000);}
+const ub=localStorage.getItem('ultimo_backup');
+if(ub)document.getElementById('ultimo-backup').textContent=ub;
+const agr=hoje();
+document.getElementById('mes-folha').value=agr.getMonth()+1;
+document.getElementById('ponto-mes-sel').value=agr.getMonth()+1;
+document.getElementById('ano-folha').value=agr.getFullYear();
+document.getElementById('ponto-ano-sel').value=agr.getFullYear();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+const TARGET_TEXT="APTIDAO FISICA E MENTAL - NÃO AGENDADO";
+const COLS=[28.33,85.04,170.08,297.64,354.33,460.63,566.94];
+const PROC_RE=/^\d{2}\.\d{6}-\d$/;
+const ROW_TOL=8,BIGY=1e6;
+function stripA(s){return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+function nsu(s){return stripA(s).replace(/\s+/g,'').toUpperCase()}
+function normSp(s){return s.replace(/\s+/g,' ').trim()}
+const TGT=nsu(TARGET_TEXT);
+function colIdx(x){for(let i=0;i<COLS.length-1;i++)if(x>=COLS[i]-2&&x<COLS[i+1])return i;return COLS.length-2;}
+function joinSp(items){const s=[...items].sort((a,b)=>a.x0-b.x0);let o='',lx=null;for(const it of s){if(lx!==null&&it.x0-lx>1)o+=' ';o+=it.str;lx=it.x0+(it.width||it.str.length*3);}return normSp(o);}
+async function extractPdf(file,cb){
+const buf=await file.arrayBuffer();
+const doc=await pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise;
+const pagesItems=[];let periodo='',clinicName='';
+for(let p=1;p<=doc.numPages;p++){
+if(cb)cb(p,doc.numPages);
+const page=await doc.getPage(p);
+const vp=page.getViewport({scale:1});
+const ct=await page.getTextContent();
+const items=ct.items.map(it=>({str:it.str,x0:it.transform[4],yTop:vp.height-it.transform[5],width:it.width})).filter(it=>it.str.trim());
+    pagesItems.push(items);
+if(p===1){
+const j=items.map(i=>i.str).join(' ');
+const m=j.match(/Per[ií]odo:\s*([\d/]+)\s*-\s*([\d/]+)/);
+if(m)periodo=`${m[1]} a ${m[2]}`;
+const sorted=[...items].sort((a,b)=>a.yTop-b.yTop);
+const lines=[];
+for(const it of sorted){let ln=lines.find(l=>Math.abs(l.yTop-it.yTop)<2.5);if(!ln){ln={yTop:it.yTop,items:[]};lines.push(ln);}ln.items.push(it);}
+      lines.sort((a,b)=>a.yTop-b.yTop);
+const idx=lines.findIndex(l=>nsu(l.items.map(i=>i.str).join('')).includes('RELATORIODEPROCESSOSVINCULADOS'));
+if(idx!==-1&&lines[idx+1])clinicName=joinSp(lines[idx+1].items);
+    }
+  }
+const inclItems=[];
+for(let pi=0;pi<pagesItems.length;pi++){
+const items=pagesItems[pi];
+const sorted=[...items].sort((a,b)=>a.yTop-b.yTop);
+const lines=[];
+for(const it of sorted){let ln=lines.find(l=>Math.abs(l.yTop-it.yTop)<2.5);if(!ln){ln={yTop:it.yTop,items:[]};lines.push(ln);}ln.items.push(it);}
+    lines.sort((a,b)=>a.yTop-b.yTop);
+for(const ln of lines){const j=nsu(ln.items.map(i=>i.str).join(''));ln.isHeader=j.includes('PROCESSO')&&j.includes('MOTIVO')&&j.includes('NOME');ln.isCat=/^CATEGORIA\d/.test(j);ln.isTotCat=j.startsWith('TOTALCATEGORIA');ln.isTotProc=j.startsWith('TOTALPROCESSOS');ln.isFooter=j.includes('OPERADOR:');}
+let inside=false;
+for(const ln of lines){
+if(ln.isHeader){inside=true;continue;}
+if(ln.isCat||ln.isTotCat||ln.isTotProc||ln.isFooter){inside=false;continue;}
+if(inside)for(const it of ln.items)inclItems.push({...it,pageIdx:pi,globalKey:pi*BIGY+it.yTop});
+    }
+  }
+for(const it of inclItems)it.col=colIdx(it.x0);
+const col0=[...inclItems.filter(it=>it.col===0)].sort((a,b)=>a.globalKey-b.globalKey||a.x0-b.x0);
+const c0lines=[];
+for(const it of col0){let ln=c0lines.find(l=>l.pageIdx===it.pageIdx&&Math.abs(l.yTop-it.yTop)<2.5);if(!ln){ln={pageIdx:it.pageIdx,yTop:it.yTop,items:[],globalKey:it.globalKey};c0lines.push(ln);}ln.items.push(it);}
+  c0lines.sort((a,b)=>a.globalKey-b.globalKey);
+const anchors=[];
+for(const ln of c0lines){const t=joinSp(ln.items).replace(/\s+/g,'');if(PROC_RE.test(t))anchors.push({processo:t,globalKey:ln.globalKey});}
+  anchors.sort((a,b)=>a.globalKey-b.globalKey);
+function findAnchor(gk){let lo=0,hi=anchors.length-1,ans=-1;while(lo<=hi){const mid=(lo+hi)>>1;if(anchors[mid].globalKey<=gk+ROW_TOL){ans=mid;lo=mid+1;}else hi=mid-1;}return ans;}
+const rows=anchors.map(a=>({processo:a.processo,cols:[[],[],[],[],[],[]]}));
+for(const it of inclItems){const i=findAnchor(it.globalKey);if(i===-1)continue;rows[i].cols[it.col].push(it);}
+function cellTxt(items){
+if(!items.length)return'';
+const si=[...items].sort((a,b)=>a.globalKey-b.globalKey||a.x0-b.x0);
+const ls=[];for(const it of si){let ln=ls.find(l=>l.pageIdx===it.pageIdx&&Math.abs(l.yTop-it.yTop)<2.5);if(!ln){ln={pageIdx:it.pageIdx,yTop:it.yTop,items:[]};ls.push(ln);}ln.items.push(it);}
+    ls.sort((a,b)=>a.pageIdx-b.pageIdx||a.yTop-b.yTop);
+return normSp(ls.map(l=>joinSp(l.items)).join(' '));
+  }
+const results=[];
+for(const row of rows){const nome=cellTxt(row.cols[2]),exame=cellTxt(row.cols[5]);if(nsu(exame)===TGT)results.push({processo:row.processo,nome});}
+const seen=new Set(),unique=[];
+for(const r of results)if(!seen.has(r.processo)){seen.add(r.processo);unique.push(r);}
+  unique.sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+return{periodo,clinicName,rows:unique,totalPages:doc.numPages};
+}
+function buildPdf(clinicName,periodo,rows){
+const{jsPDF}=window.jspdf;const doc=new jsPDF({unit:'pt',format:'a4'});const mx=42;let y=50;
+  doc.setFont('helvetica','bold');doc.setFontSize(15);doc.setTextColor(31,45,61);
+  doc.text(`${clinicName} — Candidatos sem Exame Agendado`,mx,y);y+=20;
+  doc.setFont('helvetica','normal');doc.setFontSize(11);doc.setTextColor(68,68,68);
+  doc.text('Status: NÃO AGENDADO',mx,y);y+=16;
+  doc.setFontSize(9.5);doc.setTextColor(102,102,102);
+const info=[];if(periodo)info.push('Período: '+periodo);info.push('Total: '+rows.length);
+  doc.text(info.join('   |   '),mx,y);y+=18;
+  doc.autoTable({startY:y,head:[['#','Processo','Nome do Candidato','Contato Realizado']],
+    body:rows.map((r,i)=>[String(i+1),r.processo,r.nome,'']),
+    styles:{font:'helvetica',fontSize:8.5,cellPadding:5,lineColor:[204,204,204],lineWidth:0.5},
+    headStyles:{fillColor:[44,62,80],textColor:255,fontStyle:'bold',fontSize:9},
+    alternateRowStyles:{fillColor:[242,242,242]},
+    columnStyles:{0:{cellWidth:26,halign:'center'},1:{cellWidth:75,halign:'center'},2:{cellWidth:'auto'},3:{cellWidth:95,halign:'center'}},
+    margin:{left:mx,right:mx}});
+return doc.output('blob');
+}
+function slug(s){return stripA(s).replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_+|_+$/g,'')||'clinica';}
+function triggerDl(blob,name){const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);}
+
+const dropzone=document.getElementById('dropzone');
+const fileInput=document.getElementById('fileInput');
+const queue=document.getElementById('pdf-queue');
+const toolbar=document.getElementById('pdf-toolbar');
+const toolbarCount=document.getElementById('pdf-toolbar-count');
+const zipBtn=document.getElementById('btn-zip');
+const jobs=[];
+
+dropzone.addEventListener('dragover',e=>{e.preventDefault();dropzone.classList.add('drag');});
+dropzone.addEventListener('dragleave',()=>dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop',e=>{e.preventDefault();dropzone.classList.remove('drag');handleFiles(e.dataTransfer.files);});
+fileInput.addEventListener('change',e=>handleFiles(e.target.files));
+
+function handleFiles(fl){
+  Array.from(fl).filter(f=>f.type==='application/pdf'||f.name.toLowerCase().endsWith('.pdf')).forEach(addJob);
+  fileInput.value='';
+}
+
+function addJob(file){
+const id='j'+Math.random().toString(36).slice(2);
+const card=document.createElement('div');
+  card.className='pdf-card';
+  card.innerHTML=`<div class="pdf-card-head">
+    <div class="pdf-card-dot busy"></div>
+    <div class="pdf-card-meta">
+      <input class="pdf-clinic-inp" value="Analisando…" disabled>
+      <div class="pdf-fname">${file.name}</div>
+    </div>
+    <div class="pdf-stat"><b>—</b>candidatos</div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-sm toggle-btn" disabled>Ver lista</button>
+      <button class="btn btn-sm btn-primary dl-btn" disabled>Baixar PDF</button>
+    </div>
+  </div><div class="pdf-body" style="display:none"></div>`;
+  queue.appendChild(card);
+const job={id,file,status:'busy',cardEl:card,data:null,excluded:new Set()};
+  jobs.push(job);runJob(job);
+}
+
+async function runJob(job){
+const ni=job.cardEl.querySelector('.pdf-clinic-inp');
+const dot=job.cardEl.querySelector('.pdf-card-dot');
+const sb=job.cardEl.querySelector('.pdf-stat b');
+const tb=job.cardEl.querySelector('.toggle-btn');
+const db=job.cardEl.querySelector('.dl-btn');
+const body=job.cardEl.querySelector('.pdf-body');
+  try{
+const data=await extractPdf(job.file,(p,t)=>{ni.value=`Lendo ${p}/${t}…`;});
+    job.data=data;job.status='ok';
+    ni.disabled=false;ni.value=data.clinicName||job.file.name.replace(/\.pdf$/i,'');
+    dot.className='pdf-card-dot ok';sb.textContent=data.rows.length;
+    tb.disabled=false;db.disabled=data.rows.length===0;
+    body.innerHTML=renderPdfTable(data,job.excluded);
+    tb.addEventListener('click',()=>{body.style.display=body.style.display==='none'?'block':'none';tb.textContent=body.style.display==='none'?'Ver lista':'Ocultar';});
+    body.addEventListener('change',e=>{
+if(e.target.matches('input[type=checkbox][data-proc]')){
+const proc=e.target.dataset.proc;
+if(e.target.checked)job.excluded.delete(proc);else job.excluded.add(proc);
+        e.target.closest('tr').classList.toggle('excl',!e.target.checked);
+const ac=data.rows.length-job.excluded.size;sb.textContent=ac;db.disabled=ac===0;
+      }
+    });
+    db.addEventListener('click',()=>{const cl=ni.value.trim()||'Clinica';const ar=data.rows.filter(r=>!job.excluded.has(r.processo));triggerDl(buildPdf(cl,data.periodo,ar),`${slug(cl)}_nao_agendados.pdf`);});
+    updateToolbar();
+  }catch(err){
+    job.status='error';dot.className='pdf-card-dot err';ni.value='Erro ao processar';ni.disabled=true;
+const e=document.createElement('div');e.style.cssText='font-size:12px;color:var(--red);padding:4px 16px 12px';e.textContent='Não foi possível ler este PDF. Confirme que é o relatório "Processos Vinculados" do SCH.';job.cardEl.appendChild(e);
+    updateToolbar();
+  }
+}
+
+function renderPdfTable(data,excluded){
+if(!data.rows.length)return'<p style="font-size:12px;color:var(--muted);padding:10px 0">Nenhum candidato pendente neste relatório.</p>';
+return`<table class="pdf-tbl"><thead><tr><th></th><th>#</th><th>Processo</th><th>Nome</th></tr></thead><tbody>`+
+    data.rows.map((r,i)=>`<tr data-proc="${r.processo}"><td style="width:24px"><input type="checkbox" data-proc="${r.processo}" checked></td><td style="width:26px;color:var(--muted);font-size:12px">${i+1}</td><td class="proc">${r.processo}</td><td>${r.nome}</td></tr>`).join('')+
+    '</tbody></table>';
+}
+
+function updateToolbar(){
+const done=jobs.filter(j=>j.status==='ok');
+  toolbar.style.display=done.length>1?'flex':'none';
+  toolbarCount.textContent=`${done.length} clínicas · ${done.reduce((s,j)=>s+j.data.rows.length-j.excluded.size,0)} candidatos`;
+}
+
+zipBtn.addEventListener('click',async()=>{
+const zip=new JSZip();
+for(const job of jobs.filter(j=>j.status==='ok'&&j.data.rows.length>0)){
+const ni=job.cardEl.querySelector('.pdf-clinic-inp');
+const cl=ni.value.trim()||'Clinica';
+const ar=job.data.rows.filter(r=>!job.excluded.has(r.processo));
+if(ar.length)zip.file(`${slug(cl)}_nao_agendados.pdf`,buildPdf(cl,job.data.periodo,ar));
+  }
+  triggerDl(await zip.generateAsync({type:'blob'}),'nao_agendados_todas.zip');
+});
+</script>
+</body>
+</html>
