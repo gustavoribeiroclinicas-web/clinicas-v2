@@ -440,50 +440,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 </div>
 
 
-<script>
-// Proxy — delega para funções do módulo ES6 após carregamento
-function _call(fn,...args){
-  if(window[fn])return window[fn](...args);
-  setTimeout(()=>_call(fn,...args),100);
-}
-function setLoginTipo(t,el){_call('setLoginTipo',t,el);}
-function entrar(t){_call('entrar',t);}
-function sair(){_call('sair');}
-function showPage(p,el){_call('showPage',p,el);}
-function renderFolha(){_call('renderFolha');}
-function selecionarClinica(cl){_call('selecionarClinica',cl);}
-function abrirModalCargo(){_call('abrirModalCargo');}
-function editarCargo(id){_call('editarCargo',id);}
-function fecharModalCargo(){_call('fecharModalCargo');}
-function salvarCargo(){_call('salvarCargo');}
-function excluirCargo(){_call('excluirCargo');}
-function exportarFolhaPDF(){_call('exportarFolhaPDF');}
-function renderPontoGestor(){_call('renderPontoGestor');}
-function registrarPontoRec(t){_call('registrarPontoRec',t);}
-function abrirModalJustif(d,cl){_call('abrirModalJustif',d,cl);}
-function fecharModalJustif(){_call('fecharModalJustif');}
-function salvarJustif(){_call('salvarJustif');}
-function removerPontoDia(){_call('removerPontoDia');}
-function exportarPontoPDF(){_call('exportarPontoPDF');}
-function trocarMesContas(){_call('trocarMesContas');}
-function selecionarClinicaContas(cl){_call('selecionarClinicaContas',cl);}
-function abrirModalConta(d,id){_call('abrirModalConta',d,id);}
-function editarConta(id,d){_call('editarConta',id,d);}
-function fecharModalConta(){_call('fecharModalConta');}
-function salvarConta(){_call('salvarConta');}
-function excluirConta(){_call('excluirConta');}
-function marcarPago(id,d){_call('marcarPago',id,d);}
-function exportarContasPDF(cl,m,a){_call('exportarContasPDF',cl,m,a);}
-function autoSalvarCfg(el){_call('autoSalvarCfg',el);}
-function salvarSenhaGestor(){_call('salvarSenhaGestor');}
-function salvarSenhasClinicas(){_call('salvarSenhasClinicas');}
-function exportarBackup(){_call('exportarBackup');}
-function importarBackup(el){_call('importarBackup',el);}
-</script>
 
-<script type="module">
-import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import{getDatabase,ref,set,get}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
 
 // ── CONFIG FIREBASE ──────────────────────────────────
 const FB={
@@ -495,11 +455,12 @@ const FB={
   messagingSenderId:"802245105282",
   appId:"1:802245105282:web:5241e3a59c963cec38c69b"
 };
-const app=initializeApp(FB,'v2');
-const db=getDatabase(app);
+if(!firebase.apps.find(a=>a.name==='v2'))firebase.initializeApp(FB,'v2');
+const app=firebase.apps.find(a=>a.name==='v2');
+const db=firebase.database(app);
 
-async function dbGet(p){const s=await get(ref(db,'v2/'+p));return s.exists()?s.val():null;}
-async function dbSet(p,v){await set(ref(db,'v2/'+p),v);}
+async function dbGet(p){const s=await db.ref('v2/'+p).get();return s.exists()?s.val():null;}
+async function dbSet(p,v){await db.ref('v2/'+p).set(v);}
 
 // ── CONSTANTES ────────────────────────────────────────
 const CLINICAS=['Boa Vista','Bacacheri','ColomboMed','Etika SJP','FRG','GPTRAN','Galeb','Hauer','Lifetran','MM','PrimeMed','PPTRAN','Rio Sul','São José','Tolmac'];
