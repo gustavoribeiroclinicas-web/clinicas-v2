@@ -1014,7 +1014,7 @@ const el=document.getElementById('cfg-senhas-clinicas');
     <div class="clinica-senha-row">
       <label>${cl}</label>
       <input type="text" placeholder="Senha..." value="${cfg.senhasClinicas[cl]||''}" style="padding:6px 10px;font-size:12px;border:1px solid var(--border);border-radius:var(--r);font-family:var(--mono)"
-        oninput="cfg.senhasClinicas['${cl}']=this.value.trim()">
+        oninput="cfg.senhasClinicas['${cl}']=this.value.trim()" onblur="autoSalvarCfg()">
     </div>`).join('');
 }
 
@@ -1031,8 +1031,11 @@ await dbSet('cfg',cfg);
 }
 
 async function salvarSenhasClinicas(){
-await dbSet('cfg',cfg);
-  alert('✅ Senhas das clínicas salvas!');
+  try{
+    await dbSet('cfg',cfg);
+    const btn=document.querySelector('button[onclick="salvarSenhasClinicas()"]');
+    if(btn){const orig=btn.textContent;btn.textContent='✅ Salvo!';btn.style.background='var(--green)';setTimeout(()=>{btn.textContent=orig;btn.style.background='';},2000);}
+  }catch(e){alert('Erro ao salvar: '+e.message);}
 }
 
 function exportarBackup(){
@@ -1395,7 +1398,7 @@ Object.assign(window,{
   renderFolha,selecionarClinica,abrirModalCargo,editarCargo,fecharModalCargo,salvarCargo,excluirCargo,exportarFolhaPDF,
   renderPontoGestor,registrarPontoRec,abrirModalJustif,fecharModalJustif,salvarJustif,removerPontoDia,exportarPontoPDF,
   trocarMesContas,selecionarClinicaContas,abrirModalConta,editarConta,fecharModalConta,salvarConta,excluirConta,marcarPago,exportarContasPDF,
-  salvarSenhaGestor,salvarSenhasClinicas,exportarBackup,importarBackup,
+  autoSalvarCfg,salvarSenhaGestor,salvarSenhasClinicas,exportarBackup,importarBackup,
 });
 
 // ── INIT ─────────────────────────────────────────────
