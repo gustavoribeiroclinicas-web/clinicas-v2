@@ -1067,40 +1067,101 @@ if(bk.pontoData){pontoData=bk.pontoData;for(const k of Object.keys(pontoData))aw
   reader.readAsText(file);inp.value='';
 }
 
-// ── EMAILJS ───────────────────────────────────────────
+// ── EMAILJS / NOTIFICAÇÕES DE VENCIMENTO ─────────────
 const EJS_SVC='service_rrvigcl';
 const EJS_TPL='template_loaw4wm';
 const EJS_KEY='9_sWrO7qr5CGeK8ru';
-const NOTIF_EMAIL='notificacoes.clinicas@gmail.com';
+
+// E-mail geral: recebe aviso de TODAS as clínicas.
+const EMAIL_GERAL='notificacoes.clinicas@gmail.com';
+
+// Responsável financeiro por clínica.
+const RESPONSAVEIS_CLINICAS={
+  'FRG':{nome:'João',email:'joaohamaral@hotmail.com'},
+  'GPTRAN':{nome:'João',email:'joaohamaral@hotmail.com'},
+  'Lifetran':{nome:'João',email:'joaohamaral@hotmail.com'},
+  'MM':{nome:'João',email:'joaohamaral@hotmail.com'},
+  'PrimeMed':{nome:'João',email:'joaohamaral@hotmail.com'},
+  'PPTRAN':{nome:'João',email:'joaohamaral@hotmail.com'},
+  'Rio Sul':{nome:'João',email:'joaohamaral@hotmail.com'},
+  'São José':{nome:'João',email:'joaohamaral@hotmail.com'},
+  'ColomboMed':{nome:'João',email:'joaohamaral@hotmail.com'},
+  'Bacacheri':{nome:'Paula',email:'paularibeiro_psico@hotmail.com'},
+  'Boa Vista':{nome:'Paula',email:'paularibeiro_psico@hotmail.com'},
+  'Hauer':{nome:'Paula',email:'paularibeiro_psico@hotmail.com'},
+  'Tolmac':{nome:'Paula',email:'paularibeiro_psico@hotmail.com'},
+  'Etika SJP':{nome:'Paula',email:'paularibeiro_psico@hotmail.com'},
+  'Galeb':{nome:'Paula',email:'paularibeiro_psico@hotmail.com'}
+};
+
+function dataLocalISO(d=new Date()){
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const dia=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${dia}`;
+}
+
+function linkAtualSistema(){
+  // Abre o próprio sistema. Depois do login, o diretor acessa a aba Contas.
+  return window.location.href.split('#')[0];
+}
+
+async function enviarAvisoVencimento(toEmail,clinica){
+  return emailjs.send(EJS_SVC,EJS_TPL,{
+    to_email:toEmail,
+    clinica:clinica,
+    link_sistema:linkAtualSistema(),
+    name:'Sistema de Gerenciamento de Clínicas'
+  });
+}
 
 async function verificarNotificacoes(){
-// Roda uma vez por sessão — verifica contas vencidas ontem não pagas
-const agora=hoje();
-const ontem=new Date(agora);ontem.setDate(ontem.getDate()-1);
-const ontemStr=ontem.toISOString().split('T')[0];
-const mes=ontem.getMonth()+1,ano=ontem.getFullYear();
-const k=chave(mes,ano);
-if(!contasData[k]){const d=await dbGet('contas/'+k);contasData[k]=d||{};}
-const vencidas=[];
+  // Verifica as contas com vencimento HOJE e ainda não pagas.
+  // Uma única notificação é enviada por clínica, mesmo se houver mais de uma conta vencendo no dia.
+  const agora=hoje();
+  const hojeStr=dataLocalISO(agora);
+  const mes=agora.getMonth()+1,ano=agora.getFullYear();
+  const k=chave(mes,ano);
+  if(!contasData[k]){const d=await dbGet('contas/'+k);contasData[k]=d||{};}
+
+  const porClinica={};
   CLINICAS.forEach(cl=>{
-const itens=Object.values(contasData[k]?.[cl]||{});
-    itens.forEach(c=>{
-if(!c.pago&&c.venc&&c.venc===ontemStr&&!c.padrao&&c.desc){
-        vencidas.push(`• ${cl} — ${c.desc} — R$ ${parseFloat(c.valor||0).toFixed(2).replace('.',',')} (venceu ${ontem.toLocaleDateString('pt-BR')})`);
+    const itens=Object.entries(contasData[k]?.[cl]||{});
+    itens.forEach(([id,c])=>{
+      if(!c.pago && c.venc===hojeStr && !c.padrao && c.desc && c.avisoVencimentoEm!==hojeStr){
+        if(!porClinica[cl])porClinica[cl]=[];
+        porClinica[cl].push({id,c});
       }
     });
   });
-if(!vencidas.length)return;
-  try{
-    emailjs.init(EJS_KEY);
-await emailjs.send(EJS_SVC,EJS_TPL,{
-      to_email:NOTIF_EMAIL,
-      data:agora.toLocaleDateString('pt-BR'),
-      contas:vencidas.join('\n'),
-      name:'Sistema Clínicas'
-    });
-    console.log('Notificação enviada:',vencidas.length,'conta(s)');
-  }catch(e){console.warn('EmailJS erro:',e);}
+
+  const clinicas=Object.keys(porClinica);
+  if(!clinicas.length)return;
+
+  emailjs.init(EJS_KEY);
+
+  for(const cl of clinicas){
+    const resp=RESPONSAVEIS_CLINICAS[cl]||null;
+    try{
+      // 1) Envia ao proprietário da clínica, quando houver responsável cadastrado.
+      if(resp?.email){
+        await enviarAvisoVencimento(resp.email,cl);
+      }
+
+      // 2) O e-mail geral recebe aviso de todas as clínicas.
+      // Evita envio duplicado caso um dia o e-mail geral seja igual ao do responsável.
+      if(!resp?.email || resp.email.toLowerCase()!==EMAIL_GERAL.toLowerCase()){
+        await enviarAvisoVencimento(EMAIL_GERAL,cl);
+      }
+
+      // Marca no Firebase para não repetir o aviso desta conta no mesmo dia.
+      porClinica[cl].forEach(({c})=>{c.avisoVencimentoEm=hojeStr;});
+      await dbSet('contas/'+k,contasData[k]);
+      console.log(`Aviso de vencimento enviado: ${cl}`);
+    }catch(e){
+      console.warn(`EmailJS erro em ${cl}:`,e);
+    }
+  }
 }
 
 // ── CONTAS A PAGAR ────────────────────────────────────
@@ -1315,14 +1376,16 @@ const id=idEx||'ct_'+Date.now();
 if(!contasData[k])contasData[k]={};
 if(!contasData[k][contasClinicaAtiva])contasData[k][contasClinicaAtiva]={};
 const exist=contasData[k][contasClinicaAtiva][idEx]||{};
+const novoVenc=document.getElementById('conta-venc').value;
   contasData[k][contasClinicaAtiva][id]={
     desc,
-    venc:document.getElementById('conta-venc').value,
+    venc:novoVenc,
     valor:parseFloat(document.getElementById('conta-valor').value)||0,
     pdf:document.getElementById('conta-pdf').value.trim(),
     obs:document.getElementById('conta-obs').value.trim(),
     pago:exist.pago||false,
     dataPago:exist.dataPago||null,
+    avisoVencimentoEm:(exist.venc===novoVenc ? (exist.avisoVencimentoEm||null) : null),
   };
   fecharModalConta();
 await dbSet('contas/'+k,contasData[k]);
@@ -1405,8 +1468,8 @@ Object.assign(window,{
 });
 
 // ── INIT ─────────────────────────────────────────────
-// Verifica notificações ao iniciar (roda uma vez por dia)
-const _ujn=localStorage.getItem('cl_notif_dt');const _hj=new Date().toDateString();if(_ujn!==_hj){localStorage.setItem('cl_notif_dt',_hj);setTimeout(()=>{if(typeof emailjs!=='undefined')verificarNotificacoes();},3000);}
+// Verifica notificações ao abrir o sistema. O próprio registro no Firebase evita repetição.
+setTimeout(()=>{if(typeof emailjs!=='undefined')verificarNotificacoes();},3000);
 const ub=localStorage.getItem('ultimo_backup');
 if(ub)document.getElementById('ultimo-backup').textContent=ub;
 const agr=hoje();
