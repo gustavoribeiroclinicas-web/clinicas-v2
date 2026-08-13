@@ -1068,7 +1068,7 @@ if(bk.pontoData){pontoData=bk.pontoData;for(const k of Object.keys(pontoData))aw
 }
 
 // ── EMAILJS / NOTIFICAÇÕES DE VENCIMENTO ─────────────
-const EJS_SVC='service_rrvigcl';
+const EJS_SVC='service_rivigcl';
 const EJS_TPL='template_l619esm';
 const EJS_KEY='9_sWrO7qr5CGeK8ru';
 
@@ -1392,12 +1392,6 @@ await dbSet('contas/'+k,contasData[k]);
   renderContasTabela(k,mes,ano);
   renderContasTabs(k,mes,ano);
   renderContasStats(k);
-  if(novoVenc === dataLocalISO()){
-  try{
-    await verificarNotificacoes();
-  }catch(e){
-    console.warn('Erro ao enviar notificação após salvar conta:', e);
-  }
 
   // Se a conta salva vencer hoje, tenta enviar a notificação imediatamente.
   // Isso evita depender de fechar e reabrir o sistema.
