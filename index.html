@@ -1392,6 +1392,12 @@ await dbSet('contas/'+k,contasData[k]);
   renderContasTabela(k,mes,ano);
   renderContasTabs(k,mes,ano);
   renderContasStats(k);
+  if(novoVenc === dataLocalISO()){
+  try{
+    await verificarNotificacoes();
+  }catch(e){
+    console.warn('Erro ao enviar notificação após salvar conta:', e);
+  }
 
   // Se a conta salva vencer hoje, tenta enviar a notificação imediatamente.
   // Isso evita depender de fechar e reabrir o sistema.
