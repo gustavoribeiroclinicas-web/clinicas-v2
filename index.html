@@ -1392,6 +1392,14 @@ await dbSet('contas/'+k,contasData[k]);
   renderContasTabela(k,mes,ano);
   renderContasTabs(k,mes,ano);
   renderContasStats(k);
+
+  // Se a conta salva vencer hoje, tenta enviar a notificação imediatamente.
+  // Isso evita depender de fechar e reabrir o sistema.
+  const contaSalva=contasData[k]?.[contasClinicaAtiva]?.[id];
+  if(contaSalva && !contaSalva.pago && contaSalva.venc===dataLocalISO() && typeof emailjs!=='undefined'){
+    try{await verificarNotificacoes();}
+    catch(e){console.warn('Erro ao enviar aviso após salvar conta:',e);}
+  }
 }
 
 async function excluirConta(){
@@ -1468,8 +1476,18 @@ Object.assign(window,{
 });
 
 // ── INIT ─────────────────────────────────────────────
-// Verifica notificações ao abrir o sistema. O próprio registro no Firebase evita repetição.
-setTimeout(()=>{if(typeof emailjs!=='undefined')verificarNotificacoes();},3000);
+// Verifica notificações somente depois que TODA a página e as bibliotecas externas carregarem.
+// O registro no Firebase evita repetição do mesmo aviso no mesmo dia.
+window.addEventListener('load',()=>{
+  setTimeout(async()=>{
+    if(typeof emailjs==='undefined'){
+      console.warn('EmailJS ainda não carregou; notificação não executada.');
+      return;
+    }
+    try{await verificarNotificacoes();}
+    catch(e){console.warn('Erro ao verificar notificações:',e);}
+  },1000);
+});
 const ub=localStorage.getItem('ultimo_backup');
 if(ub)document.getElementById('ultimo-backup').textContent=ub;
 const agr=hoje();
