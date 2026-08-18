@@ -1,0 +1,5 @@
+[functions]
+  directory = "netlify/functions"
+
+[functions."verificar-vencimentos"]
+  schedule = "0 11 * * *"
