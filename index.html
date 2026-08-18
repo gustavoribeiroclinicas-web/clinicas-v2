@@ -1075,24 +1075,7 @@ const EJS_KEY='9_sWrO7qr5CGeK8ru';
 // E-mail geral: recebe aviso de TODAS as clínicas.
 const EMAIL_GERAL='notificacoes.clinicas@gmail.com';
 
-// Responsável financeiro por clínica.
-const RESPONSAVEIS_CLINICAS={
-  'FRG':{nome:'João',email:'joaohamaral@hotmail.com'},
-  'GPTRAN':{nome:'João',email:'joaohamaral@hotmail.com'},
-  'Lifetran':{nome:'João',email:'joaohamaral@hotmail.com'},
-  'MM':{nome:'João',email:'joaohamaral@hotmail.com'},
-  'PrimeMed':{nome:'João',email:'joaohamaral@hotmail.com'},
-  'PPTRAN':{nome:'João',email:'joaohamaral@hotmail.com'},
-  'Rio Sul':{nome:'João',email:'joaohamaral@hotmail.com'},
-  'São José':{nome:'João',email:'joaohamaral@hotmail.com'},
-  'ColomboMed':{nome:'João',email:'joaohamaral@hotmail.com'},
-  'Bacacheri':{nome:'Paula',email:'paularibeiro_psico@hotmail.com'},
-  'Boa Vista':{nome:'Paula',email:'paularibeiro_psico@hotmail.com'},
-  'Hauer':{nome:'Paula',email:'paularibeiro_psico@hotmail.com'},
-  'Tolmac':{nome:'Paula',email:'paularibeiro_psico@hotmail.com'},
-  'Etika SJP':{nome:'Paula',email:'paularibeiro_psico@hotmail.com'},
-  'Galeb':{nome:'Paula',email:'paularibeiro_psico@hotmail.com'}
-};
+// Todas as notificações são enviadas somente para o e-mail geral.
 
 function dataLocalISO(d=new Date()){
   const y=d.getFullYear();
@@ -1141,18 +1124,9 @@ async function verificarNotificacoes(){
   emailjs.init(EJS_KEY);
 
   for(const cl of clinicas){
-    const resp=RESPONSAVEIS_CLINICAS[cl]||null;
     try{
-      // 1) Envia ao proprietário da clínica, quando houver responsável cadastrado.
-      if(resp?.email){
-        await enviarAvisoVencimento(resp.email,cl);
-      }
-
-      // 2) O e-mail geral recebe aviso de todas as clínicas.
-      // Evita envio duplicado caso um dia o e-mail geral seja igual ao do responsável.
-      if(!resp?.email || resp.email.toLowerCase()!==EMAIL_GERAL.toLowerCase()){
-        await enviarAvisoVencimento(EMAIL_GERAL,cl);
-      }
+      // Todas as clínicas notificam somente o e-mail geral.
+      await enviarAvisoVencimento(EMAIL_GERAL,cl);
 
       // Marca no Firebase para não repetir o aviso desta conta no mesmo dia.
       porClinica[cl].forEach(({c})=>{c.avisoVencimentoEm=hojeStr;});
